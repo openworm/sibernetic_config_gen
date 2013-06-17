@@ -12,11 +12,12 @@ class ElasticConnection(object):
     '''
 
 
-    def __init__(self,particle_i_id, particle_j_id, distance):
+    def __init__(self,particle_j_id, distance, val1=0, val2=0):
         '''
         Constructor
         '''
-        self.particle_i = particle_i_id 
-        self.particle_j = particle_j_id
-        self.distance = Const.simulationScale * distance
+        self.particle_j = particle_j_id + 0.1
+        self.r_ij = distance * Const.simulationScale
+        self.val1 = val1
+        self.val2 = val2
     

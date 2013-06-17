@@ -26,20 +26,21 @@ class Generator(object):
         Const.zmax = ( boxsizeZ % Const.r0 == 0 ) and boxsizeZ or ( int( boxsizeZ / Const.r0 ) + 1 ) * Const.r0 # same
         self.particles = []
         self.elasticConnections = []
+        self.nMuscles = 5;
     
     def genConfiguration(self):
         print "generating configuration"
-        print "\tgenerating Boundary Particles"
-        self.__generateBoundaryParticles()
         print "\tgenerating Elastic Particles"
         self.__generateElasticCube()
         print "\tgenerating Elastic Connections"
         elasticParticles = [p for p in self.particles if p.type == Const.elastic_particle ]
-#        for e_p in elasticParticles:
-#            self.__findNeighbour(e_p, elasticParticles)
-#        print len(self.elasticConnections)
+        for e_p in elasticParticles:
+            self.__findNeighbour(e_p, elasticParticles)
+        print len(self.elasticConnections)
         print "\tgenerate Liquid Particles"
-        self.__generateLiquidCube(self.p_count - len(elasticParticles)) 
+        self.__generateLiquidCube(self.p_count - len(elasticParticles))
+        print "\tgenerating Boundary Particles"        
+        self.__generateBoundaryParticles()
         print "TotalNumber of particle is:%s"%(len(self.particles))
         print "Finish"
     def __generateLiquidCube(self, numOfCreatedParticles):
@@ -270,16 +271,52 @@ class Generator(object):
                     p_z = Const.zmax/2 + z * Const.r0 - nEz * Const.r0 / 2;
                     particle = Particle(p_x,p_y,p_z,Const.elastic_particle)
                     particle.setVelocity(Float4(0.0,0.0,0.0,Const.elastic_particle))
-                    
+    
+    def __generateNElasticMuscle(self, elasticParticles):
+        '''
+        Generate nMuscles connected muscle
+        '''
+        nEx = 7
+        nEy = 4
+        nEz = 25
+        for nM in range(self.nMuscles):
+            for x in range(nEx):
+                for y in range(nEy):
+                    for z in range(nEz):
+                        p_x = Const.xmax/2 + x * Const.r0 - nEx * Const.r0 / 2 + Const.r0*(nEx+0.4)*(nM>2)
+                        p_y = Const.ymax/2 + y * Const.r0 - nEy * Const.r0 / 2
+                        p_z = Const.zmax/2 + z * Const.r0 - nEz * Const.r0 / 2  - (nM<=2)*(nM-1)*(nEz*Const.r0) - (nM>2)*(Const.r0/2+(nM-4)*Const.r0)*nEz - (nM==1)*Const.r0/2.5 - (nM==2)*Const.r0*2/2.5 + (nM==4)*Const.r0/2.5;
+                        particle = Particle(p_x,p_y,p_z,Const.elastic_particle)
+                        particle.setVelocity(Float4(0.0,0.0,0.0,Const.elastic_particle))
+               
     def __findNeighbour(self, particle, elasticParticles):
         '''
         Find elastc neighbour for particle
         extend elastic connections list
         '''
+        nMi = elasticParticles.index(particle)*self.nMuscles/len(elasticParticles);
         neighbour_collection = [p for p in elasticParticles if Particle.dot_particles(particle, p) < Const.r0_squared * 3.05 and p != particle ]
         neighbour_collection.sort(key=lambda p: Particle.distBetween_particles(particle, p))
         if len(neighbour_collection) > Const.MAX_NUM_OF_NEIGHBOUR:
             neighbour_collection = neighbour_collection[0:Const.MAX_NUM_OF_NEIGHBOUR]
-        elastic_connections_collection = [ElasticConnection(self.particles.index(particle),self.particles.index(p),Particle.distBetween_particles(p,particle)) for p in neighbour_collection]
+        elastic_connections_collection = []
+        for p in neighbour_collection:
+            nMj = elasticParticles.index(particle) * self.nMuscles / len(elasticParticles)
+            val1 = 0
+            if nMj == nMi:
+                dx2 = particle.x - p.x
+                dy2 = particle.y - p.y
+                dz2 = particle.z - p.z
+                dx2 *= dx2
+                dy2 *= dy2
+                dz2 *= dz2 
+                val1 = (1.1+nMi)*float((dz2 > 100*dx2)and(dz2 > 100*dy2))  
+            elastic_connections_collection.append( ElasticConnection(self.particles.index(p),Particle.distBetween_particles(p,particle), val1, 0) )
+        '''
+        If number of elastic connection less that MAX_NUM_OF_NEIGHBOUR then 
+        we extend collection of elastic connection with non particle value
+        '''
+        if len(neighbour_collection) < Const.MAX_NUM_OF_NEIGHBOUR:
+            elastic_connections_collection.extend([ElasticConnection(Const.NO_PARTICEL_ID,0,0)] * (Const.MAX_NUM_OF_NEIGHBOUR - len(neighbour_collection)) )
         self.elasticConnections.extend( elastic_connections_collection )
     
