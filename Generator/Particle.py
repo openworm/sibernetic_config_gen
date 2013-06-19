@@ -33,6 +33,7 @@ class Particle(object):
             self.velocity = Float4(0.0,0.0,0.0,self.type)
     def setVelocity(self, velocity):
         self.velocity = velocity
+        self.velocity.val = self.type
     @staticmethod
     def distBetween_particles(p1,p2):
         return Float4.dist( p1.position, p2.position )

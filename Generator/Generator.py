@@ -21,9 +21,9 @@ class Generator(object):
         TODO: more detailed comment...
         '''
         self.p_count = particle_count
-        Const.xmax = ( boxsizeX % Const.r0 == 0 ) and boxsizeX or ( int( boxsizeX / Const.r0 ) + 1 ) * Const.r0 # if boxsizeX divides on r0 without rest than XMAX = boxsizeX  
-        Const.ymax = ( boxsizeY % Const.r0 == 0 ) and boxsizeY or ( int( boxsizeY / Const.r0 ) + 1 ) * Const.r0 # same
-        Const.zmax = ( boxsizeZ % Const.r0 == 0 ) and boxsizeZ or ( int( boxsizeZ / Const.r0 ) + 1 ) * Const.r0 # same
+        Const.xmax = boxsizeX#( boxsizeX % Const.r0 == 0 ) and boxsizeX or ( int( boxsizeX / Const.r0 ) + 1 ) * Const.r0 # if boxsizeX divides on r0 without rest than XMAX = boxsizeX  
+        Const.ymax = boxsizeY#( boxsizeY % Const.r0 == 0 ) and boxsizeY or ( int( boxsizeY / Const.r0 ) + 1 ) * Const.r0 # same
+        Const.zmax = boxsizeZ#( boxsizeZ % Const.r0 == 0 ) and boxsizeZ or ( int( boxsizeZ / Const.r0 ) + 1 ) * Const.r0 # same
         self.particles = []
         self.elasticConnections = []
         self.nMuscles = 5;
@@ -31,19 +31,31 @@ class Generator(object):
     def genConfiguration(self):
         print "generating configuration"
         print "\tgenerating Elastic Particles"
-        self.__generateElasticCube()
+        i = 0
+        self.__generateNMuscle()
+        i = len(self.particles) - i
+        i_e = len(self.particles)
+        print "\t elastic particle = %s"%(i)
+        print "\tgenerated"
+        print "\tgenerated"
+        print "\tgenerate Liquid Particles"
+        self.__generateLiquidCube()
+        i = len(self.particles) - i
+        print "\t liquid particle = %s"%(i)
+        print "\tgenerated"
         print "\tgenerating Elastic Connections"
         elasticParticles = [p for p in self.particles if p.type == Const.elastic_particle ]
         for e_p in elasticParticles:
-            self.__findNeighbour(e_p, elasticParticles)
+            self.__genElasticConn(e_p, elasticParticles)
         print len(self.elasticConnections)
-        print "\tgenerate Liquid Particles"
-        self.__generateLiquidCube(self.p_count - len(elasticParticles))
         print "\tgenerating Boundary Particles"        
         self.__generateBoundaryParticles()
+        i = len(self.particles) - i - i_e
+        print "\t boundary particle = %s"%(i)
+        print "\tgenerated"
         print "TotalNumber of particle is:%s"%(len(self.particles))
         print "Finish"
-    def __generateLiquidCube(self, numOfCreatedParticles):
+    def __generateLiquidCube(self):
         '''
         This Method is generating cub of liquid
         coeff should be 0.2325 because need generate 
@@ -53,27 +65,17 @@ class Generator(object):
         So liquid 
         TODO: generate more detailed Comment
         '''
-        coeff = 0.2325
-        x = Const.h *  coeff;
-        y = Const.h *  coeff + Const.r0 * 10
-        z = Const.h *  coeff + Const.r0 * 2
-        i = 0
-        while i < numOfCreatedParticles:
-            particle = Particle(x,y,z,Const.liquid_particle)
-            x += 2 * Const.h * coeff
-            if x > Const.xmax / 3:
-                x = Const.h * coeff + Const.r0 * 2
-                z += 2 * coeff * Const.h
-            if z > Const.zmax / 3:
-                x = Const.h * coeff + Const.r0 * 2
-                z = Const.h * coeff + Const.r0 * 2
-                y += 2 * coeff * Const.h
-            self.particles.append(particle)
-            i += 1
+        for x in self.__my_range(Const.r0*23.0, (Const.xmax - Const.xmin) - Const.r0 * 23.0, Const.r0):
+            for y in self.__my_range(Const.r0*3.0, (Const.ymax - Const.ymin) * 0.0 + 9.0 * Const.r0, Const.r0):
+                for z in self.__my_range(Const.r0*23.0, (Const.zmax - Const.zmin) - 23.0 * Const.r0, Const.r0):
+                    particle = Particle(x,y,z,Const.liquid_particle)
+                    self.particles.append(particle)
+                    
     def __my_range(self, start, end, step):
-        while start <= end:
+        while start < end:
             yield start
             start += step
+            
     def __generateLiquidCube1(self, numOfCreatedParticles):
         '''
         This Method is generating cub of liquid
@@ -87,12 +89,12 @@ class Generator(object):
         x = 15 * Const.r0 / 2
         y = 3 * Const.r0 / 2
         z = 3 * Const.r0 / 2 + (Const.zmax - Const.zmin)
-        i = 0
         for x in self.__my_range(15 * Const.r0 / 2, (Const.xmax-Const.xmin)/5 + 3*Const.r0/2, Const.r0):
             for y in self.__my_range(3 * Const.r0 / 2, (Const.ymax-Const.ymin) - 3*Const.r0/2, Const.r0):
                 for z in self.__my_range(3 * Const.r0 / 2 + (Const.zmax - Const.zmin), (Const.zmax-Const.zmin) * 7 / 10 - 3 * Const.r0 / 2, Const.r0):
-                   particle = Particle(x,y,z,Const.liquid_particle)
-                   self.particles.append(particle) 
+                    particle = Particle(x,y,z,Const.liquid_particle)
+                    self.particles.append(particle) 
+                    
     def __generateBoundaryParticles(self):
         '''
         Generate boundary particles: Boundary particles can locate 
@@ -102,121 +104,135 @@ class Generator(object):
         have a length == 1 also vector vector of velocity should have direction ??
         TODO: generate better comment
         '''
-        n = int( ( Const.xmax - Const.xmin ) / Const.r0 )  # Numbers of boundary particles on X-axis  
-        m = int( ( Const.ymax - Const.ymin ) / Const.r0 )  # Numbers of boundary particles on Y-axis 
-        k = int( ( Const.zmax - Const.zmin ) / Const.r0 )  # Numbers of boundary particles on Z-axis
-        x = Const.xmin
-        z = Const.zmin
-        y = Const.ymin
-        speed = 1.0
-        normCorner = 1/math.sqrt(3.0)
-        normBoundary = 1/math.sqrt(2.0)
-        isBoundary = True
-        y1 = Const.ymax
-        i = 0
-        '''
-        In this loop we create simultaneously particles in all corners of box
-        and on two faces Y = 0 and Y = ymax
-        '''
-        while i <= 2 * ( k * n + n + k ):
-            particle1 = Particle( x , y , z, Const.boundary_particle)
-            particle2 = Particle( x, y1, z, Const.boundary_particle)
-            x += Const.r0
-            if i == 0 :
-                particle1.setVelocity( Float4(normCorner,normCorner,normCorner) )
-                particle2.setVelocity( Float4(normCorner,-normCorner,normCorner) )
-                isBoundary = True
-            if x >= Const.xmax and z == Const.zmin and not isBoundary:
-                particle1.setVelocity( Float4(-normCorner,normCorner,normCorner) )
-                particle2.setVelocity( Float4(-normCorner,-normCorner,normCorner) )
-                isBoundary = True
-            if x >= Const.xmax and z >= Const.zmax - Const.r0 and not isBoundary:
-                particle1.setVelocity( Float4(-normCorner,normCorner,-normCorner) )
-                particle2.setVelocity( Float4(-normCorner,-normCorner,-normCorner) )
-                isBoundary = True
-            if x - Const.r0 == Const.xmin and z >= Const.zmax - Const.r0 and not isBoundary:
-                particle1.setVelocity( Float4(normCorner,normCorner,-normCorner) )
-                particle2.setVelocity( Float4(normCorner,-normCorner,-normCorner) )
-                isBoundary = True
-            if x >= Const.xmax and not isBoundary:
-                particle1.setVelocity( Float4(-normBoundary,normBoundary,0.0) )
-                particle2.setVelocity( Float4(-normBoundary,-normBoundary,0.0) )
-                isBoundary = True
-            if z == Const.zmin and not isBoundary:
-                particle1.setVelocity( Float4(0.0, normBoundary, normBoundary) )
-                particle2.setVelocity( Float4(0.0,-normBoundary,normBoundary) )
-                isBoundary = True
-            if x - Const.r0 == Const.xmin and not isBoundary:
-                particle1.setVelocity( Float4(normBoundary,normBoundary, 0.0) )
-                particle2.setVelocity( Float4(normBoundary,-normBoundary,0.0) )
-                isBoundary = True
-            if z >= Const.zmax - Const.r0 and not isBoundary:
-                particle1.setVelocity( Float4(0.0,normBoundary,-normBoundary) )
-                particle2.setVelocity( Float4(0.0,-normBoundary,-normBoundary) )
-                isBoundary = True
-            if isBoundary == False:
-                particle1.setVelocity( Float4( 0.0, speed, 0.0) )
-                particle2.setVelocity( Float4( 0.0,-speed, 0.0) )
-            isBoundary = False
-            if x > Const.xmax:
-                x = Const.xmax
-                z += Const.r0
-            self.particles.append(particle1)
-            self.particles.append(particle2)
-            i += 2
-        x = Const.xmin
-        y = Const.ymin + Const.r0
-        z = Const.zmin 
-        x1 = Const.xmax
-        isBoundary = False
-        count = 2 *( k * ( m - 2 )  + k + m - 2) + i
-        '''
-        In this loop we generate boundary particle for faces X = XMIN and X = XMAX
-        '''
-        while i <= count:
-            particle1 = Particle( x, y, z, Const.boundary_particle)
-            particle2 = Particle( x1, y, z, Const.boundary_particle)
-            if z == Const.zmin:
-                particle1.setVelocity( Float4(normBoundary, 0.0, normBoundary) )
-                particle2.setVelocity( Float4(-normBoundary,0.0,normBoundary) )
-                isBoundary = True
-            if z >= Const.zmax - Const.r0 and not isBoundary:
-                particle1.setVelocity( Float4(normBoundary, 0.0, -normBoundary) )
-                particle2.setVelocity( Float4(-normBoundary,0.0,-normBoundary) )
-                isBoundary = True
-            if isBoundary == False:
-                particle1.setVelocity( Float4( speed, 0.0, 0.0) )
-                particle2.setVelocity( Float4( -speed, 0.0, 0.0) )
-            isBoundary = False
-            y += Const.r0
-            if y > Const.ymax - Const.r0:
-                y = Const.ymin + Const.r0
-                z += Const.r0
-            self.particles.append(particle1)
-            self.particles.append(particle2)
-            i += 2
-        x = Const.xmin + Const.r0;
-        y = Const.ymin + Const.r0;
-        z = Const.zmin;
-        z1 = Const.zmax;
-        count = 2 *( ( n - 2 ) * ( m - 2 )  + n + m - 4) + i;
-        '''
-        In this loop we generate boundary particle for faces Z = ZMIN and Z = ZMAX
-        '''
-        while i <= count:
-            particle1 = Particle( x, y, z, Const.boundary_particle)
-            particle2 = Particle( x, y, z1, Const.boundary_particle)
-            particle1.setVelocity(Float4(0.0, 0.0, speed))
-            particle2.setVelocity(Float4(0.0, 0.0, -speed))
-            y += Const.r0
-            if y > Const.ymax - Const.r0:
-                y = Const.ymin + Const.r0
-                x += Const.r0
-            self.particles.append(particle1)
-            self.particles.append(particle2)
-            i+=2
-        Const.BOUNDARY_PARTICLE_COUNT = i #???
-        
+        nx = int( ( Const.xmax - Const.xmin ) / Const.r0 )  # Numbers of boundary particles on X-axis  
+        ny = int( ( Const.ymax - Const.ymin ) / Const.r0 )  # Numbers of boundary particles on Y-axis 
+        nz = int( ( Const.zmax - Const.zmin ) / Const.r0 )  # Numbers of boundary particles on Z-axis
+        # 1 - top and bottom 
+        for ix in range(nx):
+            for iy in range(ny):
+                if ( ( ix == 0 ) or ( ix == nx - 1) ) or ( (iy == 0) or (iy == ny - 1 ) ) :
+                    if ( ( ix == 0 ) or ( ix == nx - 1 ) ) and ( ( iy == 0 ) or ( iy == ny - 1 ) ): #corners
+                        x = ix * Const.r0 + Const.r0 / 2.0
+                        y = iy * Const.r0 + Const.r0 / 2.0
+                        z = 0.0 * Const.r0 + Const.r0 / 2.0
+                        vel_x = ( 1.0 * float( ix == 0 ) - 1.0 * float( ix == nx - 1 ) ) / math.sqrt( 3.0 )
+                        vel_y = ( 1.0 * float( iy == 0 ) - 1.0 * float( iy == ny - 1 ) ) / math.sqrt( 3.0 )
+                        vel_z = 1.0 / math.sqrt( 3.0 )
+                        particle1 = Particle(x,y,z, Const.boundary_particle)
+                        particle1.setVelocity(Float4(vel_x, vel_y, vel_z))
+                        x = ix * Const.r0 + Const.r0 / 2.0
+                        y = iy * Const.r0 + Const.r0 / 2.0
+                        z = (nz - 1.0) * Const.r0 + Const.r0 / 2.0
+                        vel_x = ( 1.0 * float( ix == 0 ) - 1.0 * float( ix == nx - 1 ) ) / math.sqrt( 3.0 )
+                        vel_y = ( 1.0 * float( iy == 0 ) - 1.0 * float( iy == ny - 1 ) ) / math.sqrt( 3.0 )
+                        vel_z = -1.0 / math.sqrt( 3.0 )
+                        particle2 = Particle(x,y,z, Const.boundary_particle)
+                        particle2.setVelocity(Float4(vel_x, vel_y, vel_z))
+                        self.particles.append(particle1)
+                        self.particles.append(particle2)
+                    else: #edges
+                        x = ix * Const.r0 + Const.r0 / 2.0
+                        y = iy * Const.r0 + Const.r0 / 2.0
+                        z = 0.0 * Const.r0 + Const.r0 / 2.0
+                        vel_x = ( 1.0 * ( float( ix == 0 ) - float( ix == nx - 1 ) ) ) / math.sqrt( 2.0 )
+                        vel_y = ( 1.0 * ( float( iy == 0 ) - float( iy == ny - 1 ) ) ) / math.sqrt( 2.0 )
+                        vel_z = 1.0 / math.sqrt( 2.0 )
+                        particle1 = Particle(x,y,z, Const.boundary_particle)
+                        particle1.setVelocity(Float4(vel_x, vel_y, vel_z))
+                        x = ix * Const.r0 + Const.r0 / 2.0
+                        y = iy * Const.r0 + Const.r0 / 2.0
+                        z = (nz - 1.0) * Const.r0 + Const.r0 / 2.0
+                        vel_x = ( 1.0 * ( float( ix == 0 ) - float( ix == nx - 1 ) ) ) / math.sqrt( 2.0 )
+                        vel_y = ( 1.0 * ( float( iy == 0 ) - float( iy == ny - 1 ) ) ) / math.sqrt( 2.0 )
+                        vel_z = -1.0 / math.sqrt( 2.0 )
+                        particle2 = Particle(x,y,z, Const.boundary_particle)
+                        particle2.setVelocity(Float4(vel_x, vel_y, vel_z))
+                        self.particles.append(particle1)
+                        self.particles.append(particle2)
+                else: #planes
+                    x = ix * Const.r0 + Const.r0 / 2.0
+                    y = iy * Const.r0 + Const.r0 / 2.0
+                    z = 0.0 * Const.r0 + Const.r0 / 2.0
+                    vel_x = 0.0
+                    vel_y = 0.0
+                    vel_z = 1.0
+                    particle1 = Particle(x,y,z, Const.boundary_particle)
+                    particle1.setVelocity(Float4(vel_x, vel_y, vel_z))
+                    x = ix * Const.r0 + Const.r0 / 2.0
+                    y = iy * Const.r0 + Const.r0 / 2.0
+                    z = (nz - 1.0) * Const.r0 + Const.r0 / 2.0
+                    vel_x = 0.0
+                    vel_y = 0.0
+                    vel_z = -1.0
+                    particle2 = Particle(x,y,z, Const.boundary_particle)
+                    particle2.setVelocity(Float4(vel_x, vel_y, vel_z))
+                    self.particles.append(particle1)
+                    self.particles.append(particle2)
+        #2 - side walls OX-OZ and opposite
+        for ix in range(nx):
+            for iz in range(1,nz - 1):
+                if (ix == 0) or (ix == nx - 1):
+                    x = ix * Const.r0 + Const.r0 / 2.0
+                    y = 0.0 * Const.r0 + Const.r0 / 2.0
+                    z = iz * Const.r0 + Const.r0 / 2.0
+                    vel_x = 0.0
+                    vel_y = 1.0 / math.sqrt(2.0)
+                    vel_z = 1.0 * ( float( iz == 0 ) - float(iz == nz - 1 ) ) / math.sqrt(2.0)
+                    particle1 = Particle(x,y,z, Const.boundary_particle)
+                    particle1.setVelocity(Float4(vel_x, vel_y, vel_z))
+                    x = ix * Const.r0 + Const.r0 / 2.0
+                    y = ( ny - 1 ) * Const.r0 + Const.r0 / 2.0
+                    z = iz * Const.r0 + Const.r0 / 2.0
+                    vel_x = 0.0
+                    vel_y = -1.0 / math.sqrt(2.0)
+                    vel_z = 1.0 * (float(iz == 0) - float(iz == nz - 1)) / math.sqrt(2.0)
+                    particle2 = Particle(x,y,z, Const.boundary_particle)
+                    particle2.setVelocity(Float4(vel_x, vel_y, vel_z))
+                    self.particles.append(particle1)
+                    self.particles.append(particle2)
+                else:
+                    x = ix * Const.r0 + Const.r0 / 2.0
+                    y = 0.0 * Const.r0 + Const.r0 / 2.0
+                    z = iz * Const.r0 + Const.r0 / 2.0
+                    vel_x = 0.0
+                    vel_y = 1.0
+                    vel_z = 0.0
+                    particle1 = Particle(x,y,z, Const.boundary_particle)
+                    particle1.setVelocity(Float4(vel_x, vel_y, vel_z))
+                    x = ix * Const.r0 + Const.r0 / 2.0
+                    y = ( ny - 1 ) * Const.r0 + Const.r0 / 2.0
+                    z = iz * Const.r0 + Const.r0 / 2.0
+                    vel_x = 0.0
+                    vel_y = -1.0
+                    vel_z = 0.0 
+                    particle2 = Particle(x,y,z, Const.boundary_particle)
+                    particle2.setVelocity(Float4(vel_x, vel_y, vel_z))
+                    self.particles.append(particle1)
+                    self.particles.append(particle2)
+            #3 - side walls OY-OZ and opposite
+        for iy in range(1,ny - 1):
+            for iz in range(1,nz - 1):
+                x = 0.0 * Const.r0 + Const.r0 / 2.0
+                y = iy * Const.r0 + Const.r0 / 2.0
+                z = iz * Const.r0 + Const.r0 / 2.0
+                vel_x = 1.0
+                vel_y = 0.0
+                vel_z = 0.0
+                particle1 = Particle(x,y,z, Const.boundary_particle)
+                particle1.setVelocity(Float4(vel_x, vel_y, vel_z))
+                x = (nx - 1) * Const.r0 + Const.r0 / 2.0
+                y = iy * Const.r0 + Const.r0 / 2.0
+                z = iz * Const.r0 + Const.r0 / 2.0
+                vel_x = -1.0
+                vel_y = 0.0
+                vel_z = 0.0 
+                particle2 = Particle(x,y,z, Const.boundary_particle)
+                particle2.setVelocity(Float4(vel_x, vel_y, vel_z))
+                self.particles.append(particle1)
+                self.particles.append(particle2)
+
+
+     
     def __generateElasticWorm(self):
         '''
         In this function we generate elastic worm 
@@ -272,7 +288,7 @@ class Generator(object):
                     particle = Particle(p_x,p_y,p_z,Const.elastic_particle)
                     particle.setVelocity(Float4(0.0,0.0,0.0,Const.elastic_particle))
     
-    def __generateNElasticMuscle(self, elasticParticles):
+    def __generateNMuscle(self):
         '''
         Generate nMuscles connected muscle
         '''
@@ -283,13 +299,14 @@ class Generator(object):
             for x in range(nEx):
                 for y in range(nEy):
                     for z in range(nEz):
-                        p_x = Const.xmax/2 + x * Const.r0 - nEx * Const.r0 / 2 + Const.r0*(nEx+0.4)*(nM>2)
-                        p_y = Const.ymax/2 + y * Const.r0 - nEy * Const.r0 / 2
-                        p_z = Const.zmax/2 + z * Const.r0 - nEz * Const.r0 / 2  - (nM<=2)*(nM-1)*(nEz*Const.r0) - (nM>2)*(Const.r0/2+(nM-4)*Const.r0)*nEz - (nM==1)*Const.r0/2.5 - (nM==2)*Const.r0*2/2.5 + (nM==4)*Const.r0/2.5;
+                        p_x = Const.xmax / 2.0 + float(x) * Const.r0 - nEx * Const.r0 / 2.0 - Const.r0 * (nEx)/2.0 + Const.r0*(nEx+0.4)*float(nM>2)
+                        p_y = Const.ymax / 2.0 + y * Const.r0 - nEy * Const.r0 / 2.0
+                        p_z = Const.zmax / 2.0 + z * Const.r0 - nEz * Const.r0 / 2.0  - (nM<=2)*(nM-1)*(nEz*Const.r0) - float(nM>2)*(Const.r0/2+(nM-4)*Const.r0)*nEz - (nM==1)*Const.r0/2.5 - (nM==2)*Const.r0*2/2.5 + (nM==4)*Const.r0/2.5;
                         particle = Particle(p_x,p_y,p_z,Const.elastic_particle)
                         particle.setVelocity(Float4(0.0,0.0,0.0,Const.elastic_particle))
-               
-    def __findNeighbour(self, particle, elasticParticles):
+                        self.particles.append(particle)
+
+    def __genElasticConn(self, particle, elasticParticles):
         '''
         Find elastc neighbour for particle
         extend elastic connections list
@@ -304,9 +321,9 @@ class Generator(object):
             nMj = elasticParticles.index(particle) * self.nMuscles / len(elasticParticles)
             val1 = 0
             if nMj == nMi:
-                dx2 = particle.x - p.x
-                dy2 = particle.y - p.y
-                dz2 = particle.z - p.z
+                dx2 = particle.position.x - p.position.x
+                dy2 = particle.position.y - p.position.y
+                dz2 = particle.position.z - p.position.z
                 dx2 *= dx2
                 dy2 *= dy2
                 dz2 *= dz2 
@@ -317,6 +334,6 @@ class Generator(object):
         we extend collection of elastic connection with non particle value
         '''
         if len(neighbour_collection) < Const.MAX_NUM_OF_NEIGHBOUR:
-            elastic_connections_collection.extend([ElasticConnection(Const.NO_PARTICEL_ID,0,0)] * (Const.MAX_NUM_OF_NEIGHBOUR - len(neighbour_collection)) )
+            elastic_connections_collection.extend([ElasticConnection(Const.NO_PARTICEL_ID,0,0,0)] * (Const.MAX_NUM_OF_NEIGHBOUR - len(neighbour_collection)) )
         self.elasticConnections.extend( elastic_connections_collection )
     

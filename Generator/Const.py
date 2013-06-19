@@ -29,7 +29,7 @@ class Const(object):
     LIQUID_PARTICLE_COUNT = 0
     ELASTIC_PARTICLE_COUNT = 0
     PARTICLE_COUNT = LIQUID_PARTICLE_COUNT + ELASTIC_PARTICLE_COUNT
-    NO_PARTICEL_ID = -1
+    NO_PARTICEL_ID = -1.0
     '''
     Number of boundary particles depends from sizes of box.
     So I think don't include their in PARTICLE_COUNT

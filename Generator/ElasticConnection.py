@@ -16,7 +16,7 @@ class ElasticConnection(object):
         '''
         Constructor
         '''
-        self.particle_j = particle_j_id + 0.1
+        self.particle_j = (particle_j_id > 0) and (particle_j_id + 0.1) or particle_j_id
         self.r_ij = distance * Const.simulationScale
         self.val1 = val1
         self.val2 = val2
