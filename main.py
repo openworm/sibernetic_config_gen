@@ -37,6 +37,7 @@ Created on 13.02.2013
 '''
 from Generator.Generator import Generator
 from Generator.Const import Const
+from XMLWriter.XMLWriter import XMLWriter
 import sys
 
 def put_configto_file(generator, filename="./configurations/configuration.txt"):
@@ -80,6 +81,14 @@ def put_configto_file_temp(generator, filename="./configurations/configuration.t
 		output_f_v.write(s_temp)
 	output_f_v.close()
 	print "Generation have Finished result in file %s"%(filename)
+
+def create_xml_file(filename,generator):
+	xml_writer = XMLWriter(filename)
+	for p in generator.particles:
+		xml_writer.add_particle(p)
+	for c in generator.elasticConnections:
+		xml_writer.add_connection(c)
+	xml_writer.printtoFile()
 if __name__ == '__main__':
 	#g = Generator(120.24, 80.16, 180.36, particle_count = 1024*16)
 	h = 40.0 * Const.h
@@ -88,4 +97,5 @@ if __name__ == '__main__':
 	g = Generator(h, w, d)
 	g.genConfiguration()
 	put_configto_file(g)
+	create_xml_file("configuration_xml_test", g)
 	#put_configto_file_temp(g)

@@ -76,9 +76,9 @@ class Generator(object):
         print "\t liquid particle = %s"%(i)
         print "\tgenerated"
         print "\tgenerating Elastic Connections"
-        elasticParticles = [p for p in self.particles if p.type == Const.elastic_particle ]
-        for e_p in elasticParticles:
-            self.__genElasticConn(e_p, elasticParticles)
+#        elasticParticles = [p for p in self.particles if p.type == Const.elastic_particle ]
+#        for e_p in elasticParticles:
+#            self.__genElasticConn(e_p, elasticParticles)
         print len(self.elasticConnections)
         print "\tgenerating Boundary Particles"        
         self.__generateBoundaryParticles()
