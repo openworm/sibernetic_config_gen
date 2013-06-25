@@ -344,13 +344,13 @@ class Generator(object):
         extend elastic connections list
         '''
         nMi = elasticParticles.index(particle)*self.nMuscles/len(elasticParticles);
-        neighbour_collection = [p for p in elasticParticles if Particle.dot_particles(particle, p) < Const.r0_squared * 3.05 and p != particle ]
+        neighbour_collection = [p for p in elasticParticles if Particle.dot_particles(particle, p) <= Const.r0_squared * 3.05 and p != particle ]
         neighbour_collection.sort(key=lambda p: Particle.distBetween_particles(particle, p))
         if len(neighbour_collection) > Const.MAX_NUM_OF_NEIGHBOUR:
             neighbour_collection = neighbour_collection[0:Const.MAX_NUM_OF_NEIGHBOUR]
         elastic_connections_collection = []
         for p in neighbour_collection:
-            nMj = elasticParticles.index(particle) * self.nMuscles / len(elasticParticles)
+            nMj = elasticParticles.index(p) * self.nMuscles / len(elasticParticles)
             val1 = 0
             if nMj == nMi:
                 dx2 = particle.position.x - p.position.x

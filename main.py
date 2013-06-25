@@ -71,7 +71,6 @@ def put_configto_file_temp(generator, filename="./configurations/configuration.t
 	TODO: create more check 
 	'''
 	output_f_p = open("./configurations/position_test_for_Giovanni.txt","w")
-	#output_f_p.write("Position\n")
 	for  p in generator.particles:
 		s_temp = "%s\t%s\t%s\t%s\n"%(p.position.x,p.position.y,p.position.z,p.type)
 		output_f_p.write(s_temp)
@@ -80,6 +79,12 @@ def put_configto_file_temp(generator, filename="./configurations/configuration.t
 		s_temp = "%s\t%s\t%s\t%s\n"%(p.velocity.x,p.velocity.y,p.velocity.z,p.velocity.val)
 		output_f_v.write(s_temp)
 	output_f_v.close()
+	output_f_conn = open("./configurations/connectio_test.txt", "w")
+	output_f_conn.write(str(len(generator.elasticConnections)) + '\n')
+	for  e_c in generator.elasticConnections:
+		s_temp = "%s\t%s\t%s\t%s\n"%(e_c.particle_j,e_c.r_ij, e_c.val1, e_c.val2)
+		output_f_conn.write(s_temp)
+	output_f_conn.close()
 	print "Generation have Finished result in file %s"%(filename)
 
 def create_xml_file(filename,generator):
@@ -97,5 +102,6 @@ if __name__ == '__main__':
 	g = Generator(h, w, d)
 	g.genConfiguration()
 	put_configto_file(g)
-	create_xml_file("configuration_xml_test", g)
 	#put_configto_file_temp(g)
+	create_xml_file("configuration_xml_test", g)
+	
