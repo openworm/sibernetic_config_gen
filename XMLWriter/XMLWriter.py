@@ -76,6 +76,7 @@ class XMLWriter(object):
         particle_ellement.appendChild(p_pos_ellement)
         particle_ellement.appendChild(p_vel_ellement)
         self.sph_element.appendChild(particle_ellement)
+        del particle_ellement
     def add_connection(self, connection):
         connection_ellement = self.out_doc.createElement('connections')
         jd_ellement = self.out_doc.createElement('p1')

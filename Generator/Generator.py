@@ -64,7 +64,7 @@ class Generator(object):
         i = 0
         if gen_elastic:
             if gen_muscle:
-                self.nMuscles = 5
+                self.nMuscles = 3
                 self.__generateNMuscle()
             else:
                 self.nMuscles = 0
@@ -73,12 +73,12 @@ class Generator(object):
         i_e = len(self.particles)
         print "\t elastic particle = %s"%(i)
         print "\tgenerated"
-        print "\tgenerated"
-        print "\tgenerate Liquid Particles"
-        self.__generateLiquidCube()
-        i = len(self.particles) - i
-        print "\t liquid particle = %s"%(i)
-        print "\tgenerated"
+        if gen_liquid:
+            print "\tgenerate Liquid Particles"
+            self.__generateLiquidCube()
+            i = len(self.particles) - i
+            print "\t liquid particle = %s"%(i)
+            print "\tgenerated"
         if gen_elastic:
             print "\tgenerating Elastic Connections"
             elasticParticles = [p for p in self.particles if p.type == Const.elastic_particle ]
@@ -332,7 +332,7 @@ class Generator(object):
         '''
         nEx = 7
         nEy = 4
-        nEz = 25
+        nEz = 7
         for nM in range(self.nMuscles):
             for x in range(nEx):
                 for y in range(nEy):
