@@ -36,7 +36,7 @@ Created on 20.06.2013
 @author: Serg
 '''
 from xml.dom.minidom import Document
-from Generator.Const import Const
+from generator.Const import Const
 class XMLWriter(object):
     '''
     classdocs

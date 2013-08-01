@@ -35,8 +35,8 @@ Created on 13.02.2013
 
 @author: Serg
 '''
-from Generator.Generator import Generator
-from Generator.Const import Const
+from generator.Generator import Generator
+from generator.Const import Const
 from XMLWriter.XMLWriter import XMLWriter
 import sys
 
@@ -97,13 +97,14 @@ def create_xml_file(filename,generator):
 		xml_writer.add_connection(c)
 	xml_writer.printtoFile()
 if __name__ == '__main__':
-	#g = Generator(120.24, 80.16, 180.36, particle_count = 1024*16)
-	h = 20.0 * Const.h
-	w = 12.0 * Const.h
-	d = 20.0 * Const.h
-	g = Generator(h, w, d)
-	g.genConfiguration(gen_elastic=True,gen_muscle=True,gen_liquid=False)
-	#put_configto_file(g)
-	put_configto_file_temp(g,"./configurations/position_muscle.txt","./configurations/velocity_muscle.txt","./configurations/connection_muscle.txt")
-	create_xml_file("configuration_xml_test", g)
+	g = Generator('./3DModels/untitled.x3d')
+	g.genConfiguration()
+# 	h = 20.0 * Const.h
+# 	w = 12.0 * Const.h
+# 	d = 20.0 * Const.h
+# 	g = Generator(h, w, d)
+# 	g.genConfiguration(gen_elastic=True,gen_muscle=True,gen_liquid=False)
+# 	#put_configto_file(g)
+ 	put_configto_file_temp(g,"./configurations/position_muscle.txt","./configurations/velocity_muscle.txt","./configurations/connection_muscle.txt")
+# 	create_xml_file("configuration_xml_test", g)
 	
