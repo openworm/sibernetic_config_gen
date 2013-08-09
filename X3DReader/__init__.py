@@ -39,10 +39,10 @@ Created on 20.06.2013
 from xml.dom import minidom
 from generator.Const import Const
 from generator.helper.plane import Plane
-from generator.helper.point import Point
+from generator.helper.point import Point, Vector3D
 from generator.helper.collections import Vertices, Planes
 
-def read_model(file_name, points = [], planes = []):
+def read_model(file_name, points = [], planes = [], w_r_v = None):
     model_doc = minidom.parse(file_name)
     '''
     TODO: add check 
@@ -53,5 +53,13 @@ def read_model(file_name, points = [], planes = []):
     planes.extend(Planes([Plane(face) for face in faces_list]))
     v_c = model_doc.getElementsByTagName('IndexedFaceSet')[0].getElementsByTagName('Coordinate')[0].attributes['point'].value
     v_c = v_c.split(' ')
+    for element in model_doc.getElementsByTagName('Transform'):
+        if element.attributes['DEF'].value == 'World_TRANSFORM':
+            rot_vector_element = element
+            break
+    s = rot_vector_element.attributes['rotation'].value.split(' ')
+    world_rotation_vector = Vector3D(float(s[0]),float(s[1]),float(s[2]))
+    world_rotation_vector.angle = float(s[3])
     points.extend(Vertices([Point(v_c[i],v_c[i+1],v_c[i+2],int(i/3),planes) for i in range(0,len(v_c) - 1,3)]))
+    return world_rotation_vector
     

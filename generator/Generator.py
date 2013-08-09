@@ -39,7 +39,7 @@ from Const import Const
 from Particle import Particle, Float4
 from ElasticConnection import ElasticConnection
 from helper.collections import Vertices, Planes
-from helper.point import Point
+from helper.point import Point, Vector3D
 import math
 import X3DReader
 
@@ -60,7 +60,7 @@ class Generator(object):
         self.elasticConnections = []
         self.points = Vertices()
         self.planes = Planes()
-        X3DReader.read_model(f_name, self.points, self.planes)
+        self.world_rot_vector = X3DReader.read_model(f_name, self.points, self.planes)
         i = self.points.lowest_point()
         '''
         Translation to 0 0 0 
@@ -72,13 +72,20 @@ class Generator(object):
         for p in self.planes:
             p.calc_normal(self.points)
         
+        for p in self.points:
+            trans_v = Vector3D.rotate_v1_around_v2( p, self.world_rot_vector, self.world_rot_vector.angle)
+            p.x = trans_v.x
+            p.y = trans_v.y
+            p.z = trans_v.z
+            print str(p.x) + '\t' + str(p.y) + '\t' + str(p.z)
+            
         
     def genConfiguration(self, gen_muscle=False,gen_elastic=False,gen_liquid=True):
         '''
         Main Algorithm
         '''
         self.__gen_boundary_p()
-        pass
+        
     
     def __gen_boundary_p(self):
         '''

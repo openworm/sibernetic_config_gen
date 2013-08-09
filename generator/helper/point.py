@@ -56,18 +56,30 @@ class Vector3D(object):
 #         self.y *= scalar
 #         self.z *= scalar
         return Vector3D(self.x * scalar, self.y  *scalar, self.z * scalar)
+    @staticmethod
+    def dot_prod(a,b):
+        return a.x * b.x + a.y * b.y + a.z * b.z 
     @staticmethod 
     def cross_prod(a,b):
         '''
         As I understood we're using left side system of coordinates
         '''
-        return Vector3D(a.z * b.y - a.z * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
+        return Vector3D(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
     def normalize(self):
         l = math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
         self.x /= l
         self.y /= l
         self.z /= l 
-    
+    def unit(self):
+        l = math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+        return Vector3D(self.x / l, self.y / l, self.z / l)
+    @staticmethod
+    def rotate_v1_around_v2(v1,v2,angle):
+        angle *= float(math.pi / 180.0)
+        ort1 = v2.unit()  
+        ort2 = (Vector3D.cross_prod(v2,v1)).unit()
+        ort3 = (Vector3D.cross_prod(ort1, ort2)).unit()
+        return ort1 * ( Vector3D.dot_prod( v1, ort1 ) ) + ( ort2 * ( Vector3D.dot_prod( v1, ort3 ) ) ) * math.sin(angle) + ( ort3 * ( Vector3D.dot_prod( v1, ort3) ) ) * math.cos( angle )
 class Point(Vector3D):
     '''
     classdocs
