@@ -60,7 +60,8 @@ class Generator(object):
         self.elasticConnections = []
         self.points = Vertices()
         self.planes = Planes()
-        self.world_rot_vector = X3DReader.read_model(f_name, self.points, self.planes)
+        self.transforms = []
+        X3DReader.read_model(f_name, self.points, self.planes,self.transforms)
         i = self.points.lowest_point()
         '''
         Translation to 0 0 0 
@@ -71,13 +72,14 @@ class Generator(object):
             p.z = int(round(p.z))
         for p in self.planes:
             p.calc_normal(self.points)
-        
-        for p in self.points:
-            trans_v = Vector3D.rotate_v1_around_v2( p, self.world_rot_vector, self.world_rot_vector.angle)
-            p.x = trans_v.x
-            p.y = trans_v.y
-            p.z = trans_v.z
-            print str(p.x) + '\t' + str(p.y) + '\t' + str(p.z)
+        for t in self.transforms:
+            t.make_transform(self.points)
+#        for p in self.points:
+#            trans_v = Vector3D.rotate_v1_around_v2( p, self.world_rot_vector, self.world_rot_vector.angle)
+#            p.x = trans_v.x
+#            p.y = trans_v.y
+#            p.z = trans_v.z
+#            print str(p.x) + '\t' + str(p.y) + '\t' + str(p.z)
             
         
     def genConfiguration(self, gen_muscle=False,gen_elastic=False,gen_liquid=True):
