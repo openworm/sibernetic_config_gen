@@ -50,7 +50,11 @@ class Vector3D(object):
         z = self.z + p1.z
         return Vector3D(x,y,z)
     def __len__(self):
-        return math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+        return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+    
+    def length(self):
+        l = self.x ** 2 + self.y ** 2 + self.z ** 2
+        return math.sqrt(l)
     def __mul__(self, scalar):
 #         self.x *= scalar
 #         self.y *= scalar
@@ -107,6 +111,14 @@ class Point(Vector3D):
                 self.n = self.n + self.faces_l[i].getNormal()
         self.n.normalize()
         return self.n
+    def get_adj_points(self):
+        adj_points = []
+        for f in self.faces_l:
+            for e in f.edges:
+                if self.index in e:
+                    i = (e[0] == self.index) and e[1] or e[0]
+                    if not(i in adj_points) and i != self.index: adj_points.append(i)
+        return adj_points
     @staticmethod
     def find_common_plane(p1,p2):
         common_faces = []

@@ -41,8 +41,6 @@ class Plane(object):
     '''
     classdocs
     '''
-
-
     def __init__(self, vertices=[], points=None):
         '''
         Constructor

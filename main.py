@@ -97,7 +97,7 @@ def create_xml_file(filename,generator):
 		xml_writer.add_connection(c)
 	xml_writer.printtoFile()
 if __name__ == '__main__':
-	g = Generator('./3DModels/rotated_cube_45.x3d')
+	g = Generator('./3DModels/rotated_cube_in_cube_45.x3d')
 	g.genConfiguration()
 # 	h = 20.0 * Const.h
 # 	w = 12.0 * Const.h

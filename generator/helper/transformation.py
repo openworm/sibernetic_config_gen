@@ -10,7 +10,7 @@ class TransformException(Exception):
         self.message = message
 class transformation(object):
     rotation = "rotation"
-    sale = "scale"
+    scale = "scale"
     translation = "translation"
     @staticmethod
     def factory(**kwargs):
@@ -19,6 +19,10 @@ class transformation(object):
                 name = kwargs['name']
                 if name == transformation.rotation: 
                     return rotation(**kwargs)
+                if name == transformation.translation:
+                    return translation(**kwargs)
+                if name == transformation.scale:
+                    return scale(**kwargs)
                 else: return None      
             else:
                 raise TransformException('Could not create transform object because it has no name')
@@ -59,4 +63,42 @@ class rotation(transformation):
             v.x = x
             v.y = y
             v.z = z
-            pass
+            
+class translation(transformation):
+    def __init__(self, **kwargs):
+        if 'property' in kwargs:
+            property = kwargs['property'][0].split(' ')
+            if len(property) == 3:
+                x = float(property[0])
+                y = float(property[1])
+                z = float(property[2])
+                self.vector = Vector3D(x,y,z)
+            else:
+                raise TransformException('Too small number of input data it should contain vectro(x,y,z)')
+        else:
+            raise TransformException('Transformation data about translation is not available')
+    def make_transform(self, vertices=None):
+        for v in vertices:
+            v.x = v.x + self.vector.x
+            v.y = v.y + self.vector.y
+            v.z = v.z + self.vector.z
+                        
+class scale(transformation):
+    def __init__(self, **kwargs):
+        if 'property' in kwargs:
+            property = kwargs['property'][0].split(' ')
+            if len(property) == 3:
+                x = float(property[0])
+                y = float(property[1])
+                z = float(property[2])
+                self.vector = Vector3D(x,y,z)
+            else:
+                raise TransformException('Too small number of input data it should contain vectro(x,y,z)')
+        else:
+            raise TransformException('Transformation data about translation is not available')
+        
+    def make_transform(self, vertices=None):
+        for v in vertices:
+            v.x = v.x * self.vector.x
+            v.y = v.y * self.vector.y
+            v.z = v.z * self.vector.z
