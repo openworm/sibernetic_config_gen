@@ -3,7 +3,7 @@
 <X3D version="3.0" profile="Immersive" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance" xsd:noNamespaceSchemaLocation="http://www.web3d.org/specifications/x3d-3.0.xsd">
 	<head>
 		<meta name="filename" content="cube_incube.x3d" />
-		<meta name="generator" content="Blender 2.62 (sub 0)" />
+		<meta name="generator" content="Blender 2.68 (sub 0)" />
 	</head>
 	<Scene>
 		<NavigationInfo headlight="false"
@@ -15,13 +15,13 @@
 		            groundColor="0.051 0.051 0.051"
 		            skyColor="0.051 0.051 0.051"
 		            />
-		<Transform DEF="Cube_001_TRANSFORM"
-		           translation="-0.038292 0.245548 0.115760"
-		           scale="0.167454 0.184220 0.161070"
+		<Transform DEF="Cube_World_TRANSFORM"
+		           translation="0.000000 0.000000 0.000000"
+		           scale="1.000000 1.000000 1.000000"
 		           rotation="0.000000 0.707107 0.707107 3.141593"
 		           >
-			<Transform DEF="Cube_001_ifs_TRANSFORM"
-			           translation="0.000000 -0.000000 0.000000"
+			<Transform DEF="Cube_World_ifs_TRANSFORM"
+			           translation="0.000000 0.000000 0.000000"
 			           scale="1.000000 1.000000 1.000000"
 			           rotation="1.000000 0.000000 0.000000 0.000000"
 			           >
@@ -29,23 +29,23 @@
 					<Shape>
 						<Appearance>
 						</Appearance>
-						<IndexedFaceSet solid="true"
-						                coordIndex="0 1 2 3 -1 4 7 6 5 -1 0 4 5 1 -1 1 5 6 2 -1 2 6 7 3 -1 4 0 3 7 -1 "
+						<IndexedFaceSet solid="false"
+						                coordIndex="1 0 4 5 -1 5 6 2 1 -1 6 7 3 2 -1 0 3 7 4 -1 0 1 2 3 -1 7 6 5 4 -1 "
 						                >
 							<Coordinate DEF="coords_ME_Cube_001"
-							            point="1.000000 1.000000 -1.000000 1.000000 -1.000000 -1.000000 -1.000000 -1.000000 -1.000000 -1.000000 1.000000 -1.000000 1.000000 0.999999 1.000000 0.999999 -1.000001 1.000000 -1.000000 -1.000000 1.000000 -1.000000 1.000000 1.000000 "
+							            point="-1.000000 -1.000000 -1.000000 -1.000000 1.000000 -1.000000 1.000000 1.000000 -1.000000 1.000000 -1.000000 -1.000000 -1.000000 -1.000000 1.000000 -1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 1.000000 -1.000000 1.000000 "
 							            />
 						</IndexedFaceSet>
 					</Shape>
 				</Group>
 			</Transform>
 		</Transform>
-		<Transform DEF="Cube_TRANSFORM"
-		           translation="-0.019941 0.127555 -0.097510"
-		           scale="1.000000 1.000000 1.000000"
+		<Transform DEF="Cube_liquid_TRANSFORM"
+		           translation="0.027947 0.315121 -0.080795"
+		           scale="0.213182 0.229858 0.184794"
 		           rotation="0.000000 0.707107 0.707107 3.141593"
 		           >
-			<Transform DEF="Cube_ifs_TRANSFORM"
+			<Transform DEF="Cube_liquid_ifs_TRANSFORM"
 			           translation="0.000000 0.000000 0.000000"
 			           scale="1.000000 1.000000 1.000000"
 			           rotation="1.000000 0.000000 0.000000 0.000000"
@@ -73,30 +73,18 @@
 				</Group>
 			</Transform>
 		</Transform>
-		<Transform DEF="Lamp_TRANSFORM"
-		           translation="-4.076245 5.903862 1.005454"
-		           scale="1.000000 1.000000 1.000000"
-		           rotation="-0.498084 -0.762016 -0.413815 1.513875"
-		           >
-			<PointLight DEF="LA_Lamp"
-			            ambientIntensity="0.0000"
-			            color="1.0000 1.0000 1.0000"
-			            intensity="0.5714"
-			            radius="30.0000" 
-			            location="-0.0000 -0.0000 0.0000"
-			            />
-		</Transform>
-		<Transform DEF="Camera_TRANSFORM"
-		           translation="-7.481132 5.343665 -6.507640"
-		           scale="1.000000 1.000000 1.000000"
-		           rotation="-0.093039 -0.968741 -0.229967 2.347036"
-		           >
-			<Viewpoint DEF="CA_Camera"
-			           centerOfRotation="0 0 0"
-			           position="0.00 0.00 -0.00"
-			           orientation="-0.00 0.00 0.00 0.00"
-			           fieldOfView="0.858"
-			           />
-		</Transform>
+		<PointLight DEF="LA_Lamp"
+		            ambientIntensity="0.0000"
+		            color="1.0000 1.0000 1.0000"
+		            intensity="0.5714"
+		            radius="30.0000" 
+		            location="-0.0000 -0.0000 0.0000"
+		            />
+		<Viewpoint DEF="CA_Camera"
+		           centerOfRotation="0 0 0"
+		           position="0.00 0.00 -0.00"
+		           orientation="-0.92 0.35 0.17 0.00"
+		           fieldOfView="0.858"
+		           />
 	</Scene>
 </X3D>

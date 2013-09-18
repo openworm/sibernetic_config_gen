@@ -60,6 +60,8 @@ class Vector3D(object):
 #         self.y *= scalar
 #         self.z *= scalar
         return Vector3D(self.x * scalar, self.y  *scalar, self.z * scalar)
+    def clone(self):
+        return Vector3D(self.x, self.y, self.z)
     @staticmethod
     def dot_prod(a,b):
         return a.x * b.x + a.y * b.y + a.z * b.z 

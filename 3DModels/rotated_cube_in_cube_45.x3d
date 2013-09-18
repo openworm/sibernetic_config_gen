@@ -15,7 +15,7 @@
 		            groundColor="0.051 0.051 0.051"
 		            skyColor="0.051 0.051 0.051"
 		            />
-		<Transform DEF="OB_Cube_liquid_ifs_TRANSFORM"
+		<Transform DEF="Cube_liquid_TRANSFORM"
 		           translation="-0.287149 0.477008 -0.012987"
 		           scale="0.179136 0.195864 0.177235"
 		           rotation="-1.000000 0.000000 0.000000 1.570796"
@@ -34,7 +34,7 @@
 				</Shape>
 			</Group>
 		</Transform>
-		<Transform DEF="OB_Cube_World_ifs_TRANSFORM"
+		<Transform DEF="Cube_World_TRANSFORM"
 		           translation="0.000000 0.000000 0.000000"
 		           scale="1.000000 1.000000 1.000000"
 		           rotation="-1.000000 0.000000 0.000000 0.789218"

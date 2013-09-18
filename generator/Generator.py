@@ -78,8 +78,24 @@ class Generator(object):
                 p.x = int(round(p.x))
                 p.y = int(round(p.y))
                 p.z = int(round(p.z))
+            if o.type ==  obj.boundary_box:
+                i_l = o.points.lowest_point()
+                i_h = o.points.higest_point()
+                v = o.points[i_h] - o.points[i_l]
+                Const.xmax =  v.getX()
+                Const.ymax =  v.getY()
+                Const.zmax =  v.getZ() 
+                print Const.xmax
+                print Const.ymax
+                print Const.zmax 
+#                v = Point(-o.points[i_l].x, -o.points[i_l].y, -o.points[i_l].z)
+#                for p in o.points:
+#                    p.x += v.x
+#                    p.y += v.y
+#                    p.z += v.z
+#                    print str(p.x) + '\t' + str(p.y) + '\t' + str(p.z)
             #Get global coordinates of points
-            for t in o.transforms:
+            for t in reversed(o.transforms):
                 t.make_transform(o.points)
             #Calculate norm vectors for each plane
             for p in o.planes:
@@ -110,9 +126,9 @@ class Generator(object):
         On second step calc normales for point which should locate on edges
         '''
         for p in o.points:
-            x = p.getX()
-            y = p.getY()
-            z = p.getZ()
+            x = p.getX() + Const.xmax / 2.0
+            y = p.getY() + Const.ymax / 2.0
+            z = p.getZ() + Const.xmax / 2.0
             particle = Particle(x,y,z, Const.boundary_particle)
             particle.setVelocity(p.get_normal())
             self.particles.append(particle)
@@ -126,13 +142,13 @@ class Generator(object):
                     l = (v.length() * float(Const.TRANF_CONST) * Const.r0)
                     v.normalize()
                     v *= l
-                    for step in self.__my_range(Const.r0,l - Const.r0,Const.r0):
+                    for step in self.__my_range(Const.r0,l ,Const.r0):
                         v1 = v * (step / l)
                         p = Point( v1.x + o.points[e[0]].getX(), v1.y + o.points[e[0]].getY(), v1.z + o.points[e[0]].getZ() )
                         p.faces_l = Point.find_common_plane(o.points[e[0]], o.points[e[1]])
-                        x = p.x#p.getX() 
-                        y = p.y#p.getY()
-                        z = p.z#p.getZ()
+                        x = p.x + Const.xmax / 2.0#p.getX() 
+                        y = p.y + Const.ymax / 2.0#p.getY()
+                        z = p.z + Const.xmax / 2.0#p.getZ()
                         particle = Particle(x,y,z, Const.boundary_particle)
                         particle.setVelocity(p.get_normal())
                         self.particles.append(particle)
@@ -140,27 +156,35 @@ class Generator(object):
         #return
         #third step create particles for all planes
         for plane in o.planes:
+            plane.calcBigArea(o.points)
             e1 = plane.edges[0]
             e2 = plane.edges[len(plane.edges) - 1]
             v1 = o.points[e2[0]] - o.points[e2[1]]
             v2 = o.points[e1[1]] - o.points[e1[0]]
             l1 = (v1.length() * (Const.TRANF_CONST) * Const.r0)
             l2 = (v2.length() * (Const.TRANF_CONST) * Const.r0)
+            v1_temp = v1.clone()
+            v2_temp = v2.clone()
             v1.normalize()
             v2.normalize()
             v1 *= l1
             v2 *= l2
-            for stepX in self.__my_range(Const.r0,l1 - Const.r0,Const.r0):
-                for stepY in self.__my_range(Const.r0,l2 - Const.r0,Const.r0):
-                    v_temp = (v1 * ( stepX / l1 )) + (v2 * ( stepY / l2 ))
-                    p = Point(v_temp.x + o.points[e1[0]].getX(),v_temp.y + o.points[e1[0]].getY(),v_temp.z + o.points[e1[0]].getZ())
-                    #p.faces_l.append(plane)
-                    x = p.x
-                    y = p.y
-                    z = p.z
-                    particle = Particle(x,y,z, Const.boundary_particle)
-                    particle.setVelocity(plane.getNormal())
-                    self.particles.append(particle)
+            for stepX in self.__my_range(Const.r0,l1,Const.r0):
+                for stepY in self.__my_range(Const.r0,l2,Const.r0):
+                    alpha = ( stepX / l1 )
+                    beta = ( stepY / l2 )
+                    v_temp_1 = (v1_temp * alpha) + (v2_temp * beta)
+                    p_temp = Point(v_temp_1.x + o.points[e1[0]].x,v_temp_1.y + o.points[e1[0]].y,v_temp_1.z + o.points[e1[0]].z)
+                    if plane.checkPoint(p_temp,o.points):
+                        v_temp = (v1 * alpha) + (v2 * beta)
+                        p = Point(v_temp.x + o.points[e1[0]].getX(),v_temp.y + o.points[e1[0]].getY(),v_temp.z + o.points[e1[0]].getZ())
+                        x = p.x + Const.xmax / 2.0
+                        y = p.y + Const.ymax / 2.0
+                        z = p.z + Const.xmax / 2.0
+                        particle = Particle(x,y,z, Const.boundary_particle)
+                        particle.setVelocity(plane.getNormal())
+                        self.particles.append(particle)
+        print "boundary particle %s" %len(self.particles) 
     
     def __gen_liquid_p(self, o):
         i = o.points.lowest_point()
@@ -169,13 +193,13 @@ class Generator(object):
         zmin = o.points[i].getZ()
         adj_points = o.points[i].get_adj_points()
         if len(adj_points) == 3:
-            ort1 = o.points[0] - o.points[i]
-            ort2 = o.points[1] - o.points[i]
-            ort3 = o.points[2] - o.points[i]
+            ort1 = o.points[adj_points[0]] - o.points[i]
+            ort2 = o.points[adj_points[1]] - o.points[i]
+            ort3 = o.points[adj_points[2]] - o.points[i]
             for x in self.__my_range(xmin, ort1.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
                 for y in self.__my_range(ymin, ort2.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
                     for z in self.__my_range(zmin, ort3.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
-                        particle = Particle(x,y,z,Const.liquid_particle)
+                        particle = Particle(x + Const.xmax / 2.0,y + Const.ymax / 2.0,z + Const.zmax / 2.0,Const.liquid_particle)
                         self.particles.append(particle)
     
     def __my_range(self, start, end, step):

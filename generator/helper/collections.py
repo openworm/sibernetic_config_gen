@@ -47,7 +47,15 @@ class Vertices(list):
         Constructor
         '''
         list.__init__(self,points)
-   
+    def higest_point(self):
+        m = list.__getitem__(self,0).x + list.__getitem__(self,0).y + list.__getitem__(self,0).z
+        index = 0  
+        for i in range(list.__len__(self)):
+            p = list.__getitem__(self,i) 
+            if p.x + p.y + p.z > m:
+                m = p.x + p.y + p.z
+                index = i
+        return index
     def lowest_point(self):
         m = list.__getitem__(self,0).x + list.__getitem__(self,0).y + list.__getitem__(self,0).z
         index = 0  

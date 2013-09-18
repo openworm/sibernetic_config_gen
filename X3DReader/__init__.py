@@ -55,16 +55,16 @@ def read_model(file_name, objects):
         faces_list = faces_list.split('-1')
         faces_list = [face_s.split(' ') for face_s in faces_list if face_s != ' ']
         o.planes.extend(Planes([Plane(face) for face in faces_list]))
-        v_c = model_doc.getElementsByTagName('IndexedFaceSet')[0].getElementsByTagName('Coordinate')[0].attributes['point'].value
+        v_c = element.getElementsByTagName('IndexedFaceSet')[0].getElementsByTagName('Coordinate')[0].attributes['point'].value
         v_c = v_c.split(' ')
         o.points.extend(Vertices([Point(v_c[i],v_c[i+1],v_c[i+2],int(i/3),o.planes) for i in range(0,len(v_c) - 1,3)]))
         for atr in element.attributes.items():
             t = transformation.factory(name = atr[0], property = atr[1:])
             if t != None: 
                 o.transforms.extend([t])
-        if element.attributes['DEF'].value == 'OB_Cube_World_ifs_TRANSFORM':
+        if element.attributes['DEF'].value == 'Cube_World_TRANSFORM':
             o.type = generator.Generator.obj.boundary_box
             objects.extend([o])
-        if element.attributes['DEF'].value == 'OB_Cube_liquid_ifs_TRANSFORM':
+        if element.attributes['DEF'].value == 'Cube_liquid_TRANSFORM':
             o.type = generator.Generator.obj.liquid_box
             objects.extend([o])
