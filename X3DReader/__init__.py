@@ -62,9 +62,12 @@ def read_model(file_name, objects):
             t = transformation.factory(name = atr[0], property = atr[1:])
             if t != None: 
                 o.transforms.extend([t])
-        if element.attributes['DEF'].value == 'Cube_World_TRANSFORM':
+        if element.attributes['DEF'].value == 'cube_world_TRANSFORM':
             o.type = generator.Generator.obj.boundary_box
             objects.extend([o])
-        if element.attributes['DEF'].value == 'Cube_liquid_TRANSFORM':
+        if element.attributes['DEF'].value == 'cube_liquid_TRANSFORM':
             o.type = generator.Generator.obj.liquid_box
+            objects.extend([o])
+        if element.attributes['DEF'].value == 'cube_elastic_TRANSFORM':
+            o.type = generator.Generator.obj.elastic_box
             objects.extend([o])

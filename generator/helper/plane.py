@@ -93,8 +93,27 @@ class Plane(object):
             a = Vector3D(points[e[0]].x - p.x, points[e[0]].y - p.y, points[e[0]].z - p.z)
             b = Vector3D(points[e[1]].x - p.x, points[e[1]].y - p.y, points[e[1]].z - p.z)
             b_s += self.__getArea(a, b)
+        #return True
         if abs(b_s - self.area) <= eps:
             return True
         return False
-            
+    def __getEdgesForPoint(self,point):
+        ed = []
+        for e in self.edges:
+            if e[0] == point.index or e[1] == point.index:
+                ed.append(e)  
+        return ed
+    def getBigestEdges(self,points):
+        bigestLen = 0
+        for p in points:
+            ed = self.__getEdgesForPoint(p)
+            if len(ed) == 2:
+                v1 = points[ed[0][1]] - points[ed[0][0]]
+                v2 = points[ed[1][1]] - points[ed[1][0]]
+                temp_len = v1.length() + v2.length()
+                if temp_len > bigestLen :
+                    self.eX = ed[0]
+                    self.eY = ed[1]
+                    self.start = p.index
+                    bigestLen = temp_len
         

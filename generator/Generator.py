@@ -118,6 +118,8 @@ class Generator(object):
                 self.__gen_boundary_p(o)
             if o.type == obj.liquid_box:
                 self.__gen_liquid_p(o)
+            if o.type == obj.elastic_box:
+                self.__gen_elastic_p(o)
         
     
     def __gen_boundary_p(self, o):
@@ -157,10 +159,17 @@ class Generator(object):
         #third step create particles for all planes
         for plane in o.planes:
             plane.calcBigArea(o.points)
-            e1 = plane.edges[0]
-            e2 = plane.edges[len(plane.edges) - 1]
-            v1 = o.points[e2[0]] - o.points[e2[1]]
-            v2 = o.points[e1[1]] - o.points[e1[0]]
+            plane.getBigestEdges(o.points)
+            e1 = plane.eX#plane.edges[0]
+            e2 = plane.eY#plane.edges[len(plane.edges) - 1]
+            if e1[0] == plane.start:
+                v1 = o.points[e1[1]] - o.points[e1[0]]
+            else:
+                v1 = o.points[e1[0]] - o.points[e1[1]]
+            if e2[0] == plane.start:
+                v2 = o.points[e2[1]] - o.points[e2[0]]
+            else:
+                v2 = o.points[e2[0]] - o.points[e2[1]]
             l1 = (v1.length() * (Const.TRANF_CONST) * Const.r0)
             l2 = (v2.length() * (Const.TRANF_CONST) * Const.r0)
             v1_temp = v1.clone()
@@ -174,10 +183,10 @@ class Generator(object):
                     alpha = ( stepX / l1 )
                     beta = ( stepY / l2 )
                     v_temp_1 = (v1_temp * alpha) + (v2_temp * beta)
-                    p_temp = Point(v_temp_1.x + o.points[e1[0]].x,v_temp_1.y + o.points[e1[0]].y,v_temp_1.z + o.points[e1[0]].z)
+                    p_temp = Point(v_temp_1.x + o.points[plane.start].x,v_temp_1.y + o.points[plane.start].y,v_temp_1.z + o.points[plane.start].z)
                     if plane.checkPoint(p_temp,o.points):
                         v_temp = (v1 * alpha) + (v2 * beta)
-                        p = Point(v_temp.x + o.points[e1[0]].getX(),v_temp.y + o.points[e1[0]].getY(),v_temp.z + o.points[e1[0]].getZ())
+                        p = Point(v_temp.x + o.points[plane.start].getX(),v_temp.y + o.points[plane.start].getY(),v_temp.z + o.points[plane.start].getZ())
                         x = p.x + Const.xmax / 2.0
                         y = p.y + Const.ymax / 2.0
                         z = p.z + Const.xmax / 2.0
@@ -192,43 +201,59 @@ class Generator(object):
         ymin = o.points[i].getY()
         zmin = o.points[i].getZ()
         adj_points = o.points[i].get_adj_points()
+        start_num = len(self.particles)
         if len(adj_points) == 3:
             ort1 = o.points[adj_points[0]] - o.points[i]
             ort2 = o.points[adj_points[1]] - o.points[i]
             ort3 = o.points[adj_points[2]] - o.points[i]
-            for x in self.__my_range(xmin, ort1.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
-                for y in self.__my_range(ymin, ort2.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
-                    for z in self.__my_range(zmin, ort3.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
-                        particle = Particle(x + Const.xmax / 2.0,y + Const.ymax / 2.0,z + Const.zmax / 2.0,Const.liquid_particle)
+            for x in self.__my_range(xmin, xmin + ort1.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
+                for y in self.__my_range(ymin, ymin + ort2.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
+                    for z in self.__my_range(zmin, zmin + ort3.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
+                        particle = Particle(x + Const.xmax / 2.0,y + Const.ymax / 2.0,z + Const.xmax / 2.0,Const.liquid_particle)
                         self.particles.append(particle)
+        print "generated liquid particles:%s"%(str(len(self.particles) - start_num)) 
+        
+    def __gen_elastic_p(self,o):
+        i = o.points.lowest_point()
+        xmin = o.points[i].getX()
+        ymin = o.points[i].getY()
+        zmin = o.points[i].getZ()
+        adj_points = o.points[i].get_adj_points()
+        _eparticles = []
+        if len(adj_points) == 3:
+            ort1 = o.points[adj_points[0]] - o.points[i]
+            ort2 = o.points[adj_points[1]] - o.points[i]
+            ort3 = o.points[adj_points[2]] - o.points[i]
+            for x in self.__my_range(xmin, xmin + ort1.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
+                for y in self.__my_range(ymin, ymin + ort2.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
+                    for z in self.__my_range(zmin, zmin + ort3.length() * (Const.TRANF_CONST) * Const.r0, Const.r0):
+                        particle = Particle(x + Const.xmax / 2.0,y + Const.ymax / 2.0,z + Const.xmax / 2.0,Const.elastic_particle)
+                        _eparticles.append(particle)
+        print "elastic particle:%s"%(len(_eparticles))
+        _eparticles.extend(self.particles)
+        self.particles = _eparticles
+        elasticParticles = [p for p in self.particles if p.type == Const.elastic_particle ]
+        for p in elasticParticles:
+            self.__genElasticConn(p, elasticParticles)
+        print "generated elastic connections:%s"%(len(self.elasticConnections))
     
     def __my_range(self, start, end, step):
         while start < end:
             yield start
             start += step     
+            
     def __genElasticConn(self, particle, elasticParticles):
         '''
         Find elastc neighbour for particle
-        extend elastic connections list
+        extend elastic connections listS
         '''
-        nMi = elasticParticles.index(particle)*self.nMuscles/len(elasticParticles);
         neighbour_collection = [p for p in elasticParticles if Particle.dot_particles(particle, p) <= Const.r0_squared * 3.05 and p != particle ]
         neighbour_collection.sort(key=lambda p: Particle.distBetween_particles(particle, p))
         if len(neighbour_collection) > Const.MAX_NUM_OF_NEIGHBOUR:
             neighbour_collection = neighbour_collection[0:Const.MAX_NUM_OF_NEIGHBOUR]
         elastic_connections_collection = []
         for p in neighbour_collection:
-            nMj = elasticParticles.index(p) * self.nMuscles / len(elasticParticles)
-            val1 = 0
-            if self.nMuscles > 0:
-                if nMj == nMi:
-                    dx2 = particle.position.x - p.position.x
-                    dy2 = particle.position.y - p.position.y
-                    dz2 = particle.position.z - p.position.z
-                    dx2 *= dx2
-                    dy2 *= dy2
-                    dz2 *= dz2 
-                    val1 = (1.1+nMi)*float((dz2 > 100*dx2)and(dz2 > 100*dy2))  
+            val1 = 1.1
             elastic_connections_collection.append( ElasticConnection(self.particles.index(p),Particle.distBetween_particles(p,particle), val1, 0) )
         '''
         If number of elastic connection less that MAX_NUM_OF_NEIGHBOUR then 
@@ -237,4 +262,3 @@ class Generator(object):
         if len(neighbour_collection) < Const.MAX_NUM_OF_NEIGHBOUR:
             elastic_connections_collection.extend([ElasticConnection(Const.NO_PARTICEL_ID,0,0,0)] * (Const.MAX_NUM_OF_NEIGHBOUR - len(neighbour_collection)) )
         self.elasticConnections.extend( elastic_connections_collection )
-    
