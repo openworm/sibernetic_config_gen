@@ -90,12 +90,12 @@ class Point(Vector3D):
     '''
     classdocs
     '''
-    def __init__(self, x, y, z,index=-1, planes=None):
+    def __init__(self, x, y, z,index=-1, planes=None, step = 0):
         '''
         Constructor
         '''
         Vector3D.__init__(self,x,y,z)
-        self.index = int(index)
+        self.index = int(index) - step
         if planes != None:
             self.faces = self.find_planes(planes)
     def getX(self):
@@ -107,6 +107,7 @@ class Point(Vector3D):
     def find_planes(self, plains):
         self.faces_l = filter(lambda p: self.index in p.vertices, plains)
     def get_normal(self):
+        #print len(self.faces_l)
         self.n = self.faces_l[0].getNormal()
         if len(self.faces_l) > 1:
             for i in range(1,len(self.faces_l),1):

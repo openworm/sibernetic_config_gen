@@ -78,16 +78,7 @@ class Generator(object):
                 p.x = int(round(p.x))
                 p.y = int(round(p.y))
                 p.z = int(round(p.z))
-            if o.type ==  obj.boundary_box:
-                i_l = o.points.lowest_point()
-                i_h = o.points.higest_point()
-                v = o.points[i_h] - o.points[i_l]
-                Const.xmax =  v.getX()
-                Const.ymax =  v.getY()
-                Const.zmax =  v.getZ() 
-                print Const.xmax
-                print Const.ymax
-                print Const.zmax 
+            
 #                v = Point(-o.points[i_l].x, -o.points[i_l].y, -o.points[i_l].z)
 #                for p in o.points:
 #                    p.x += v.x
@@ -98,6 +89,16 @@ class Generator(object):
             for t in reversed(o.transforms):
                 t.make_transform(o.points)
             #Calculate norm vectors for each plane
+            if o.type ==  obj.boundary_box:
+                i_l = o.points.lowest_point()
+                i_h = o.points.higest_point()
+                v = o.points[i_h] - o.points[i_l]
+                Const.xmax =  v.getX()
+                Const.ymax =  v.getY()
+                Const.zmax =  v.getZ() 
+                print Const.xmax
+                print Const.ymax
+                print Const.zmax 
             for p in o.planes:
                 p.calc_normal(o.points)
 

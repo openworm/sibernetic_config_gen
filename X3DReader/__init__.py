@@ -51,23 +51,56 @@ def read_model(file_name, objects):
     '''
     for element in model_doc.getElementsByTagName('Transform'):
         o = generator.Generator.obj()
-        faces_list = element.getElementsByTagName('IndexedFaceSet')[0].attributes['coordIndex'].value
-        faces_list = faces_list.split('-1')
-        faces_list = [face_s.split(' ') for face_s in faces_list if face_s != ' ']
-        o.planes.extend(Planes([Plane(face) for face in faces_list]))
-        v_c = element.getElementsByTagName('IndexedFaceSet')[0].getElementsByTagName('Coordinate')[0].attributes['point'].value
-        v_c = v_c.split(' ')
-        o.points.extend(Vertices([Point(v_c[i],v_c[i+1],v_c[i+2],int(i/3),o.planes) for i in range(0,len(v_c) - 1,3)]))
-        for atr in element.attributes.items():
-            t = transformation.factory(name = atr[0], property = atr[1:])
-            if t != None: 
-                o.transforms.extend([t])
+        ok = False
         if element.attributes['DEF'].value == 'cube_world_TRANSFORM':
             o.type = generator.Generator.obj.boundary_box
-            objects.extend([o])
+            ok = True
         if element.attributes['DEF'].value == 'cube_liquid_TRANSFORM':
             o.type = generator.Generator.obj.liquid_box
-            objects.extend([o])
+            ok = True
         if element.attributes['DEF'].value == 'cube_elastic_TRANSFORM':
             o.type = generator.Generator.obj.elastic_box
+            ok = True
+        if ok:
+            faces_list = element.getElementsByTagName('IndexedFaceSet')[0].attributes['coordIndex'].value
+            
+            faces_list = prepare_v_list(faces_list).strip(' ')
+            
+            faces_list = faces_list.split('-1')
+            
+            faces_list = [face_s.split(' ') for face_s in faces_list if face_s != ' ' and face_s != '']
+            o.planes.extend(Planes([Plane(face) for face in faces_list]))
+            v_c = element.getElementsByTagName('IndexedFaceSet')[0].getElementsByTagName('Coordinate')[0].attributes['point'].value
+            v_c = v_c.split(' ')
+            o.points.extend(Vertices([Point(v_c[i],v_c[i+1],v_c[i+2],int((i)/3),o.planes, 1) for i in range(0,len(v_c) - 1,3)]))
+            o.points.pop(0)
+            for atr in element.attributes.items():
+                t = transformation.factory(name = atr[0], property = atr[1:])
+                if t != None: 
+                    o.transforms.extend([t])
             objects.extend([o])
+
+def prepare_v_list(v_list):
+    '''
+    Vertices list can start not from 0 but and from 1
+    we should correctly work with it
+    '''
+    _v_list = v_list.split(' ')
+    zero_v = int(_v_list[0])
+    for v in _v_list:
+        if v != '-1' and v != '':
+            v = int(v)
+            if v < zero_v:
+                zero_v = v
+    result_str = ''
+    if zero_v != 0:
+        for v in _v_list:
+            if v != '-1' and v != '':
+                v = int(v)
+                result_str += str(v - zero_v) + ' '
+            else:
+                result_str += v + ' '
+    else:
+        result_str = v_list
+    return result_str
+        
