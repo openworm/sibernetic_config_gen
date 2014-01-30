@@ -39,6 +39,7 @@ from generator.Generator import Generator
 from generator.Const import Const
 from XMLWriter.XMLWriter import XMLWriter
 import sys
+import utils
 
 def put_configto_file(generator, filename="./configurations/configuration.txt"):
 	'''
@@ -63,7 +64,7 @@ def put_configto_file(generator, filename="./configurations/configuration.txt"):
 		output_f.write(s_temp)
 	output_f.close()
 	print "Generation have Finished result in file %s"%(filename)
-def put_configto_file_temp(generator, pos_file="./configurations/position.txt",vel_file="./configurations/velocity.txt", con_file="./configurations/connection.txt"):
+def put_configto_file_temp(generator, pos_file="./configurations/position.txt",vel_file="./configurations/velocity.txt", con_file="./configurations/connection.txt", mem_file="./configurations/membranes.txt", mem_index_file="./configurations/particleMembraneIndex.txt"):
 	'''
 	Create configuration file and put information
 	about particle position, velocity and elastic 
@@ -85,6 +86,21 @@ def put_configto_file_temp(generator, pos_file="./configurations/position.txt",v
 		s_temp = "%s\t%s\t%s\t%s\n"%(e_c.particle_j,e_c.r_ij, e_c.val1, e_c.val2)
 		output_f_conn.write(s_temp)
 	output_f_conn.close()
+	output_f_m = open(mem_file, "w")
+	for  m in generator.membranes:
+		s_temp = "%s\t%s\t%s\n"%(m.id,m.jd, m.kd)
+		output_f_m.write(s_temp)
+	output_f_m.close()
+	output_f_mi = open(mem_index_file, "w")
+	i=0
+	for  p in generator.particles:
+		if p.type == Const.elastic_particle:
+			for m_i in p.membranesIndex:
+				s_temp = "%s\n"%(m_i)
+				output_f_mi.write(s_temp)
+				i+=1
+	print i
+	output_f_mi.close()
 	print "Generation have Finished result in file %s"%(pos_file)
 	print "Generation have Finished result in file %s"%(vel_file)
 	print "Generation have Finished result in file %s"%(con_file)
@@ -95,16 +111,26 @@ def create_xml_file(filename,generator):
 		xml_writer.add_particle(p)
 	for c in generator.elasticConnections:
 		xml_writer.add_connection(c)
+	for m in generator.membranes:
+		xml_writer.add_membrane(m)
+	for  p in generator.particles:
+		if p.type == Const.elastic_particle:
+			for m_i in p.membranesIndex:
+				xml_writer.add_membraneIndex(m_i)
+	xml_writer.printtoFile()
+def create_xml_file_1(filename,config):
+	xml_writer = XMLWriter(filename)
+	for p in config["position"]:
+		xml_writer.add_particle(p)
+	for c in config["econn"]:
+		xml_writer.add_connection(c)
 	xml_writer.printtoFile()
 if __name__ == '__main__':
-	g = Generator('./3DModels/big_1.x3d')#cube_with_elastic_cube2.x3d')
+	g = Generator('./3DModels/simple_cube_1.x3d')#cube_with_elastic_cube2.x3d')
 	g.genConfiguration()
-# 	h = 20.0 * Const.h
-# 	w = 12.0 * Const.h
-# 	d = 20.0 * Const.h
-# 	g = Generator(h, w, d)
-# 	g.genConfiguration(gen_elastic=True,gen_muscle=True,gen_liquid=False)
-# 	#put_configto_file(g)
- 	put_configto_file_temp(g,"./configurations/position_muscle.txt","./configurations/velocity_muscle.txt","./configurations/connection_muscle.txt")
-# 	create_xml_file("configuration_xml_test", g)
+ 	put_configto_file_temp(g,"./configurations/position.txt","./configurations/velocity.txt","./configurations/connection.txt", "./configurations/membranes.txt", "./configurations/particleMembraneIndex.txt")
+ 	#config = utils.read_config_from_file("./temp/out_config_step_0.txt")
+ 	#create_xml_file_1("friction_test_1", config)
+ 	#create_xml_file("friction_test_cube", g)
+ 	#create_xml_file("cube_with_membranes", g)
 	

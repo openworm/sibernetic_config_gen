@@ -60,6 +60,7 @@ class XMLWriter(object):
         self.sph_element.setAttribute('yMax',str(Const.ymax))
         self.sph_element.setAttribute('xmlns',"http://www.example.org/SPHSchema")
         self.out_doc.appendChild(self.sph_element)
+        
     def add_particle(self, particle):
         particle_ellement = self.out_doc.createElement('particles')
         particle_ellement.setAttribute('mass', str(Const.mass))
@@ -77,6 +78,7 @@ class XMLWriter(object):
         particle_ellement.appendChild(p_vel_ellement)
         self.sph_element.appendChild(particle_ellement)
         del particle_ellement
+        
     def add_connection(self, connection):
         connection_ellement = self.out_doc.createElement('connections')
         jd_ellement = self.out_doc.createElement('p1')
@@ -92,6 +94,28 @@ class XMLWriter(object):
         connection_ellement.appendChild(distance_ellemtn)
         connection_ellement.appendChild(val1_ellemnt)
         self.sph_element.appendChild(connection_ellement)
+        
+    def add_membrane(self, membrane):
+        membrane_ellement = self.out_doc.createElement('membranes')
+        particle_i_ellement = self.out_doc.createElement('particle_i')
+        ptext = self.out_doc.createTextNode(str(membrane.id))
+        particle_i_ellement.appendChild(ptext)
+        particle_j_ellement = self.out_doc.createElement('particle_j')
+        ptext = self.out_doc.createTextNode(str(membrane.jd))
+        particle_j_ellement.appendChild(ptext)
+        particle_k_ellement = self.out_doc.createElement('particle_k')
+        ptext = self.out_doc.createTextNode(str(membrane.kd))
+        particle_k_ellement.appendChild(ptext)  
+        membrane_ellement.appendChild(particle_i_ellement)
+        membrane_ellement.appendChild(particle_j_ellement)
+        membrane_ellement.appendChild(particle_k_ellement)
+        self.sph_element.appendChild(membrane_ellement)
+        
+    def add_membraneIndex(self, index):
+        particleMembranesList = self.out_doc.createElement('particleMembranesList')  
+        ptext = self.out_doc.createTextNode(str(index))
+        particleMembranesList.appendChild(ptext)
+        self.sph_element.appendChild(particleMembranesList)
         
     def printtoFile(self):
         try:

@@ -68,10 +68,13 @@ class Plane(object):
         '''
         return self.normal
     def calc_normal(self,points):
-        a = points[self.vertices[1]] - points[self.vertices[0]]
-        b = points[self.vertices[len(self.vertices)-1]] - points[self.vertices[0]]
-        self.normal = Vector3D.cross_prod(a, b)
-        self.normal.normalize()
+        try:
+            a = points[self.vertices[1]] - points[self.vertices[0]]
+            b = points[self.vertices[len(self.vertices)-1]] - points[self.vertices[0]]
+            self.normal = Vector3D.cross_prod(a, b)
+            self.normal.normalize()
+        except ZeroDivisionError as e:
+            print "Problem rise in plane [ %s ] normal has zero length"%(self.vertices)
     def checkPoint(self, p, points):
         b_s = 0
 #        if abs(self.area - 3.0) <= eps:

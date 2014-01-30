@@ -72,13 +72,21 @@ def read_model(file_name, objects):
             o.planes.extend(Planes([Plane(face) for face in faces_list]))
             v_c = element.getElementsByTagName('IndexedFaceSet')[0].getElementsByTagName('Coordinate')[0].attributes['point'].value
             v_c = v_c.split(' ')
-            o.points.extend(Vertices([Point(v_c[i],v_c[i+1],v_c[i+2],int((i)/3),o.planes, 1) for i in range(0,len(v_c) - 1,3)]))
-            o.points.pop(0)
+            p_s = []
+            for i in range(0,len(v_c) - 1, 3):
+                p = Point(v_c[i],v_c[i+1],v_c[i+2],int((i)/3),o.planes, 0)
+                if(int((i)/3) < 0):
+                    print "ddd"
+                p_s.append(p)
+            v = Vertices(p_s)
+            o.points.extend(v)
+            #o.points.pop(0)
             for atr in element.attributes.items():
                 t = transformation.factory(name = atr[0], property = atr[1:])
                 if t != None: 
                     o.transforms.extend([t])
             objects.extend([o])
+    print "Read %s object from file"%len(objects)
 
 def prepare_v_list(v_list):
     '''

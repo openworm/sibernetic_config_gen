@@ -57,11 +57,17 @@ class Float4(object):
     def dot(v1, v2): 
         return (v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y) + (v1.z - v2.z) * (v1.z - v2.z)
 class Particle(object):
-    def __init__(self, pos_x, pos_y, pos_z, p_type):
+    def __init__(self, pos_x, pos_y, pos_z, p_type,face_p=False):
         self.position = Float4(pos_x,pos_y,pos_z, type)
+        self.face_p = face_p
         self.type = p_type
+        self.membranesIndex = [-1]*Const.MAX_MEMBRANES_INCLUDING_SAME_PARTICLE
+        self.last_non_zero_val = 0
         if self.type == Const.liquid_particle or self.type == Const.elastic_particle:
             self.velocity = Float4(0.0,0.0,0.0,self.type)
+    def insertMem(self,value):
+        self.membranesIndex[self.last_non_zero_val] = value
+        self.last_non_zero_val += 1
     def setVelocity(self, v):
         self.velocity = Float4(v.x,v.y,v.z)
         self.velocity.val = self.type

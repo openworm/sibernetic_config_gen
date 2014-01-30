@@ -73,9 +73,11 @@ class Vector3D(object):
         return Vector3D(a.z * b.y - a.y * b.z, a.x * b.z - a.z * b.x, a.y * b.x - a.x * b.y)
     def normalize(self):
         l = math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+        if l == 0.0:
+            raise ZeroDivisionError("Devision by zero: length of vector equal 0")
         self.x /= l
         self.y /= l
-        self.z /= l 
+        self.z /= l
     def unit(self):
         l = math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
         return Vector3D(self.x / l, self.y / l, self.z / l)
@@ -86,6 +88,10 @@ class Vector3D(object):
         ort2 = (Vector3D.cross_prod(v2,v1)).unit()
         ort3 = (Vector3D.cross_prod(ort1, ort2)).unit()
         return ort1 * ( Vector3D.dot_prod( v1, ort1 ) ) + ( ort2 * ( Vector3D.dot_prod( v1, ort3 ) ) ) * math.sin(angle) + ( ort3 * ( Vector3D.dot_prod( v1, ort3) ) ) * math.cos( angle )
+    @staticmethod 
+    def dist(a, b):
+        v = b - a
+        return v.length(self)
 class Point(Vector3D):
     '''
     classdocs
@@ -108,12 +114,16 @@ class Point(Vector3D):
         self.faces_l = filter(lambda p: self.index in p.vertices, plains)
     def get_normal(self):
         #print len(self.faces_l)
-        self.n = self.faces_l[0].getNormal()
-        if len(self.faces_l) > 1:
-            for i in range(1,len(self.faces_l),1):
-                self.n = self.n + self.faces_l[i].getNormal()
-        self.n.normalize()
-        return self.n
+        try:
+            self.n = self.faces_l[0].getNormal()
+            if len(self.faces_l) > 1:
+                for i in range(1,len(self.faces_l),1):
+                    self.n = self.n + self.faces_l[i].getNormal()
+            self.n.normalize()
+            return self.n
+        except ZeroDivisionError as e:
+            print str(e)
+            print "Problem in point %s because it counldn't be normalize"%(self.index)
     def get_adj_points(self):
         adj_points = []
         for f in self.faces_l:
@@ -129,5 +139,6 @@ class Point(Vector3D):
             if p in p2.faces_l:
                 common_faces.append(p)
         return common_faces
-        
+    def get_in_real_c(self):
+        return Vector3D(self.getX(),self.getY(),self.getZ())
     
