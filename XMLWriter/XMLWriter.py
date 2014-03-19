@@ -119,7 +119,7 @@ class XMLWriter(object):
         
     def printtoFile(self):
         try:
-            f = open('./configurations/' + self.docname + '.xml', 'w')
+            f = open('./configurations/geppetto/' + self.docname + '.xml', 'w')
             f.write(self.out_doc.toprettyxml(encoding='utf-8'))
             f.close()
             print 'Configuration was save in file % s in flder configuration', self.docname + '.xml'

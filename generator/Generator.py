@@ -135,7 +135,7 @@ class Generator(object):
         before = len(self.particles)
         for p in o.points:
             x = p.getX() + Const.xmax / 2.0
-            y = p.getY() + Const.zmax / 2.0
+            y = p.getY() + Const.ymax / 2.0
             z = p.getZ() + Const.zmax / 2.0
             particle = Particle(x,y,z, Const.boundary_particle)
             particle.setVelocity(p.get_normal())
@@ -244,39 +244,52 @@ class Generator(object):
             o1_l = ort1.length() * (Const.TRANF_CONST) * Const.r0
             o2_l = ort2.length() * (Const.TRANF_CONST) * Const.r0
             o3_l = ort3.length() * (Const.TRANF_CONST) * Const.r0
-            self.period1 = 11#int(ort1.length() * (Const.TRANF_CONST)) 
-            self.period2 = 11#int(ort2.length() * (Const.TRANF_CONST)) 
-            self.period3 = 11#int(ort3.length() * (Const.TRANF_CONST)) 
+            self.period1 = int(ort1.length() * (Const.TRANF_CONST)) + 1
+            self.period2 = int(ort2.length() * (Const.TRANF_CONST)) + 1
+            self.period3 = int(ort3.length() * (Const.TRANF_CONST)) + 1
             ort1.normalize()
             ort2.normalize()
             ort3.normalize()
             ort1 *= o1_l
             ort2 *= o2_l
             ort3 *= o3_l
-
+            m1 = m2 = m3 = False
+            oneLP = True
             for step_x in self.__my_range(0, o1_l, Const.r0):
                 alpha = step_x / o1_l
                 if step_x == 0 or (step_x < o1_l and step_x + Const.r0 >= o1_l):
                     index_i = True
                 else:
                     index_i = False
+                if step_x == Const.r0 or (step_x < o1_l - Const.r0 and step_x + 2 * Const.r0 >= o1_l):
+                    m1 = True
+                else:
+                    m1 = False
                 for step_y in self.__my_range(0, o2_l, Const.r0):
                     beta = step_y / o2_l
                     if step_y == 0 or (step_y < o2_l and step_y + Const.r0 >= o2_l):
                         index_j = True
                     else:
                         index_j = False
+                    if step_y == Const.r0 or (step_y < o2_l - Const.r0 and step_y + 2 * Const.r0 >= o2_l):
+                        m2 = True
+                    else:
+                        m2 = False
                     for step_z in self.__my_range(0, o3_l, Const.r0):
                         gamma = step_z / o3_l
-                        if step_z == 0 or (step_z < o3_l and step_z + Const.r0 >= o3_l):
+                        if step_z == 0 or (step_z < o3_l and step_z + Const.r0 >= o3_l)  :
                             index_k = True
                         else:
                             index_k = False
+                        if step_z == Const.r0 or (step_z < o3_l - Const.r0 and step_z + 2 * Const.r0 >= o3_l):
+                            m3 = True
+                        else:
+                            m3 = False
                         v_temp = (ort1 * alpha) + (ort2 * beta) + (ort3 * gamma) 
                         x = xmin + v_temp.x
                         y = ymin + v_temp.y
                         z = zmin + v_temp.z
-                        particle = Particle(x + Const.xmax / 2.0, y + Const.zmax / 2.0, z + Const.zmax / 2.0,Const.elastic_particle)
+                        particle = Particle(x + Const.xmax / 2.0, y + Const.ymax / 2.0, z + Const.zmax / 2.0,Const.elastic_particle)
                         if index_i or index_j or index_k: 
                             particle.face_p = True
                             if (index_i and index_j) or (index_j and index_k) or (index_i and index_k) :
@@ -294,10 +307,19 @@ class Generator(object):
                                 self.plane4.append(len(_eparticles) - 1)
                             if step_z < o3_l and step_z + Const.r0 >= o3_l:
                                 self.plane5.append(len(_eparticles) - 1)
-                            
                         else: 
-                            particle.type = Const.elastic_particle
-                            l_particle.append(particle)
+#                            if m1 or m2 or m3:
+#                                particle.type = Const.elastic_particle
+                                #l_particle.append(particle)
+#                            else:
+                                particle.type = Const.elastic_particle
+                                #particle.position.x = Const.xmax / 2.0
+                                #particle.position.y = Const.ymax / 2.0
+                                #particle.position.z = Const.zmax / 2.0
+                                #if oneLP:
+                                l_particle.append(particle)
+                                #oneLP = False
+                            
                         #if particle.face_p:
                         
         print "elastic particle:%s"%(len(_eparticles))

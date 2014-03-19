@@ -37,6 +37,7 @@ Created on 13.02.2013
 '''
 from Const import Const
 import math
+from helper.point import Point
 
 class Float4(object):
     '''
@@ -47,6 +48,8 @@ class Float4(object):
         self.y = y
         self.z = z
         self.val = val
+    def __str__(self):
+        return str(self.x) +" " + str(self.y) + " " + str(self.z)
     @staticmethod
     def getZeroVector():
         return Float4( 0.0, 0.0, 0.0, 0.0 )
@@ -65,6 +68,11 @@ class Particle(object):
         self.last_non_zero_val = 0
         if self.type == Const.liquid_particle or self.type == Const.elastic_particle:
             self.velocity = Float4(0.0,0.0,0.0,self.type)
+    def ismemindexempty(self):
+        isempty = len([l for l in self.membranesIndex if l != -1])
+        if isempty == 0:
+            return True
+        return False
     def insertMem(self,value):
         self.membranesIndex[self.last_non_zero_val] = value
         self.last_non_zero_val += 1
@@ -77,3 +85,17 @@ class Particle(object):
     @staticmethod
     def dot_particles(p1,p2):
         return Float4.dot( p1.position, p2.position )
+    def  __sub__(self, p1):
+        return Point(self.position.x - p1.position.x, self.position.y - p1.position.y, self.position.z - p1.position.z)
+    def get_normal(self, membranes, particles):
+        #print len(self.faces_l)
+        try:
+            if not self.ismemindexempty():
+                self.n = membranes[self.membranesIndex[0]].get_normal(particles)
+                for i in range(1,len(self.membranesIndex),1):
+                    self.n = self.n + membranes[self.membranesIndex[i]].get_normal(particles)
+                self.n.normalize()
+                return self.n
+        except ZeroDivisionError as e:
+            print str(e)
+            print "Problem in point %s because it counldn't be normalize"%(self.index)

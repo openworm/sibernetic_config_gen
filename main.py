@@ -38,6 +38,7 @@ Created on 13.02.2013
 from generator.Generator import Generator
 from generator.Const import Const
 from XMLWriter.XMLWriter import XMLWriter
+from XMLWriter import colladawriter
 import sys
 import utils
 
@@ -125,12 +126,24 @@ def create_xml_file_1(filename,config):
 	for c in config["econn"]:
 		xml_writer.add_connection(c)
 	xml_writer.printtoFile()
+def create_collada_file(filename, g):
+	colladawriter.writeheader(filename)
+	pos_array = [p.position for p in g.particles if (p.type == Const.elastic_particle and not(p.ismemindexempty()))]
+	normal_array = [p.get_normal(g.membranes, g.particles) for p in g.particles if (p.type == Const.elastic_particle and not(p.ismemindexempty()))] 
+	colladawriter.writepositions(filename, "cube", pos_array)
+	colladawriter.writenormales(filename, normal_array)
+	triangles = [str(m) for m in g.membranes]
+	colladawriter.writetriangles(filename, triangles)
+	colladawriter.writefooter(filename)
+	pass
 if __name__ == '__main__':
-	g = Generator('./3DModels/simple_cube_1.x3d')#cube_with_elastic_cube2.x3d')
+	g = Generator('./3DModels/simple_cube_scene_for_gravity_test.x3d')#('./3DModels/simple_cube_now.x3d')#cube_with_elastic_cube2.x3d')
 	g.genConfiguration()
+	#create_collada_file("./configurations/colladafiles/collada_test_file.dae", g)
  	put_configto_file_temp(g,"./configurations/position.txt","./configurations/velocity.txt","./configurations/connection.txt", "./configurations/membranes.txt", "./configurations/particleMembraneIndex.txt")
  	#config = utils.read_config_from_file("./temp/out_config_step_0.txt")
  	#create_xml_file_1("friction_test_1", config)
  	#create_xml_file("friction_test_cube", g)
  	#create_xml_file("cube_with_membranes", g)
+ 	#create_xml_file("cube_with_liquid", g)
 	

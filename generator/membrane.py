@@ -36,7 +36,7 @@ Created on Dec 25, 2013
 
 @author: serg
 '''
-
+from helper.point import Vector3D
 class membrane(object):
     '''
     classdocs
@@ -50,7 +50,17 @@ class membrane(object):
         self.id =  id
         self.jd =  jd
         self.kd =  kd
-    
+    def __str__(self):
+        return str(self.id) + " " + str(self.jd) + " " + str(self.kd)
+    def get_normal(self,particles):
+        try:
+            a = particles[self.jd] - particles[self.id]
+            b = particles[self.kd] - particles[self.id]
+            self.normal = Vector3D.cross_prod(a, b)
+            self.normal.normalize()
+            return self.normal
+        except ZeroDivisionError as e:
+            print "Problem rise in plane [ %s ] normal has zero length"%(self.vertices)
     def inMembrane(self, p_index):
 #         if p_index in self.points:
 #             return True
