@@ -33,48 +33,42 @@ from __future__ import with_statement
 '''
 Created on Jul 29, 2013
 
-@author: serg
+@author: Sergey Khayrulin
 '''
 
+
 class Vertices(list):
-    '''
+    """
     classdocs
-    '''
+    """
+    def __init__(self, points=[]):
+        list.__init__(self, points)
 
-
-    def __init__(self,points=[]):
-        '''
-        Constructor
-        '''
-        list.__init__(self,points)
     def higest_point(self):
-        m = list.__getitem__(self,0).x + list.__getitem__(self,0).y + list.__getitem__(self,0).z
+        m = list.__getitem__(self, 0).x + list.__getitem__(self, 0).y + list.__getitem__(self, 0).z
         index = 0  
         for i in range(list.__len__(self)):
-            p = list.__getitem__(self,i) 
+            p = list.__getitem__(self, i)
             if p.x + p.y + p.z > m:
                 m = p.x + p.y + p.z
                 index = i
         return index
+
     def lowest_point(self):
-        m = list.__getitem__(self,0).x + list.__getitem__(self,0).y + list.__getitem__(self,0).z
+        m = list.__getitem__(self, 0).x + list.__getitem__(self, 0).y + list.__getitem__(self, 0).z
         index = 0  
         for i in range(list.__len__(self)):
-            p = list.__getitem__(self,i) 
+            p = list.__getitem__(self, i)
             if p.x + p.y + p.z < m:
                 m = p.x + p.y + p.z
                 index = i
         return index
 
+
 class Planes(list):
-    '''
+    """
     classdocs
-    '''
+    """
+    def __init__(self, planes=[]):
+        list.__init__(self, planes)
 
-
-    def __init__(self,planes=[]):
-        '''
-        Constructor
-        '''
-        list.__init__(self,planes)
-        

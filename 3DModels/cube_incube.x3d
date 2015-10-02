@@ -17,7 +17,7 @@
 		            />
 		<Transform DEF="cube_world_TRANSFORM"
 		           translation="0.000000 0.000000 0.000000"
-		           scale="1.000000 1.000000 1.000000"
+		           scale="5.000000 5.000000 5.000000"
 		           rotation="0.000000 0.707107 0.707107 3.141593"
 		           >
 			<Transform DEF="Cube_World_ifs_TRANSFORM"
@@ -42,7 +42,7 @@
 		</Transform>
 		<Transform DEF="cube_liquid_TRANSFORM"
 		           translation="0.027947 0.315121 -0.080795"
-		           scale="0.213182 0.229858 0.184794"
+		           scale="1.0 1.0 1.0"
 		           rotation="0.000000 0.707107 0.707107 3.141593"
 		           >
 			<Transform DEF="Cube_liquid_ifs_TRANSFORM"

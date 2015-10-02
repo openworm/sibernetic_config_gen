@@ -30,90 +30,106 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from __future__ import with_statement
+
 '''
 Created on Jul 29, 2013
 
-@author: serg
+@author: Sergey Khayrulin
 '''
 from point import Vector3D
+
 eps = 0.000000001
+
+
+class PlaneException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 class Plane(object):
-    '''
+    """
     classdocs
-    '''
+    """
     def __init__(self, vertices=[], points=None):
-        '''
-        Constructor
-        '''
-        self.vertices = [ int(v) for v in vertices if v != '']
+        if len(vertices) < 3:
+            raise PlaneException('Plane could not contain less than 3 vertices. Check your configuration file.')
+        self.vertices = [int(v) for v in vertices if v != '']
         '''
         List of all edges for current plane
         '''
         self.edges = []
         for i in range(len(self.vertices)):
-            j = (i + 1) <= len(self.vertices) - 1 and i + 1 or 0  
-            item = [self.vertices[i],self.vertices[j]]
+            j = (i + 1) <= len(self.vertices) - 1 and i + 1 or 0
+            item = [self.vertices[i], self.vertices[j]]
             self.edges.append(item)
-            #[[self.vertices[i], (i + 1) <= len(self.vertices) - 1 and self.vertices[i + 1] or self.vertices[0]] for i in range(len(self.vertices))]
-    def calcBigArea(self,points):
-        s1 = self.__getArea(points[self.edges[0][1]] - points[self.edges[0][0]], points[self.edges[3][1]] - points[self.edges[3][0]])
-        s2 = self.__getArea(points[self.edges[1][1]] - points[self.edges[1][0]], points[self.edges[2][1]] - points[self.edges[2][0]]) 
-        self.area = s1 + s2 
-    def __getArea(self,a,b):
+
+    def calc_area(self, points):
+        if len(self.vertices) == 4:
+            self.area = self.__get_area(points[self.edges[0][1]] - points[self.edges[0][0]],
+                             points[self.edges[-1][1]] - points[self.edges[-1][0]])
+            self.area += self.__get_area(points[self.edges[1][1]] - points[self.edges[1][0]],
+                             points[self.edges[2][1]] - points[self.edges[2][0]])
+        else:
+            self.area = self.__get_area(points[self.edges[0][1]] - points[self.edges[0][0]],
+                             points[self.edges[-1][1]] - points[self.edges[-1][0]])
+
+    def __get_area(self, a, b):
         ab = Vector3D.cross_prod(a, b)
-        return ab.length()/2.0
-    def getNormal(self):
-        '''
-        TODO: check of definition of normal
-        '''
+        return ab.length() / 2.0
+
+    @property
+    def get_normal(self):
         return self.normal
-    def calc_normal(self,points):
+
+    def set_normal(self, points):
+        """
+        Calculating of normal vector to current plane
+        :param points:
+        """
         a = points[self.vertices[1]] - points[self.vertices[0]]
-        b = points[self.vertices[len(self.vertices)-1]] - points[self.vertices[0]]
+        b = points[self.vertices[-1]] - points[self.vertices[0]]
         self.normal = Vector3D.cross_prod(a, b)
         self.normal.normalize()
-    def checkPoint(self, p, points):
+
+    def check_point(self, p, points):
+        """
+        Checking point it is on a current plain
+        :param p: point with coordinates
+        :param points: collection of all points
+        :return: True or False
+        """
         b_s = 0
-#        if abs(self.area - 3.0) <= eps:
-#            print '======================='
-#            print str(p.x) + "\t" + str(p.y) + "\t" + str(p.z)
-#            e1 = self.edges[0]
-#            e2 = self.edges[len(self.edges) - 1]
-#            v1 = points[e2[0]] - points[e2[1]]
-#            v2 = points[e1[1]] - points[e1[0]]
-#            print self.area
-#            print v1.length()
-#            print v2.length()
-#            #v1.normalize()
-#            #v2.normalize()
-#            print str(v1.x) + "\t" + str(v1.y) + "\t" + str(v1.z)
-#            print str(v2.x) + "\t" + str(v2.y) + "\t" + str(v2.z)
-#            print str(points[e1[0]].x) + "\t" + str(points[e1[0]].y) + "\t" + str(points[e1[0]].z)
         for e in self.edges:
             a = Vector3D(points[e[0]].x - p.x, points[e[0]].y - p.y, points[e[0]].z - p.z)
             b = Vector3D(points[e[1]].x - p.x, points[e[1]].y - p.y, points[e[1]].z - p.z)
-            b_s += self.__getArea(a, b)
-        #return True
+            b_s += self.__get_area(a, b)
+        # return True
         if abs(b_s - self.area) <= eps:
             return True
         return False
-    def __getEdgesForPoint(self,point):
+
+    def __get_edges_for_point(self, point):
+        """
+        Get collection of edges for specific point
+        :param point: point
+        :return: collection of edges which contains this point
+        """
         ed = []
         for e in self.edges:
             if e[0] == point.index or e[1] == point.index:
-                ed.append(e)  
+                ed.append(e)
         return ed
-    def getBigestEdges(self,points):
+
+    def getBigestEdges(self, points):
         bigestLen = 0
         for p in points:
-            ed = self.__getEdgesForPoint(p)
+            ed = self.__get_edges_for_point(p)
             if len(ed) == 2:
                 v1 = points[ed[0][1]] - points[ed[0][0]]
                 v2 = points[ed[1][1]] - points[ed[1][0]]
                 temp_len = v1.length() + v2.length()
-                if temp_len > bigestLen :
+                if temp_len > bigestLen:
                     self.eX = ed[0]
                     self.eY = ed[1]
                     self.start = p.index
                     bigestLen = temp_len
-        

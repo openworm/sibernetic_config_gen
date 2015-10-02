@@ -30,61 +30,68 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from __future__ import with_statement
+
 '''
 Created on 20.06.2013
 
-@author: Serg
+@author: Sergey Khayrulin
 @contact: s.khayrulin@gmail.com
 '''
 from xml.dom import minidom
-from generator.Const import Const
-from generator.helper.plane import Plane
-from generator.helper.point import Point, Vector3D
+from generator.helper.plane import Plane, PlaneException
+from generator.helper.point import Point
 from generator.helper.collections import Vertices, Planes
-from generator.helper.transformation import transformation
-#from generator.Generator import obj
-import generator
-def read_model(file_name, objects):
-    model_doc = minidom.parse(file_name)
-    '''
-    TODO: add check 
-    '''
-    for element in model_doc.getElementsByTagName('Transform'):
-        o = generator.Generator.obj()
-        ok = False
-        if element.attributes['DEF'].value == 'cube_world_TRANSFORM':
-            o.type = generator.Generator.obj.boundary_box
-            ok = True
-        if element.attributes['DEF'].value == 'cube_liquid_TRANSFORM':
-            o.type = generator.Generator.obj.liquid_box
-            ok = True
-        if element.attributes['DEF'].value == 'cube_elastic_TRANSFORM':
-            o.type = generator.Generator.obj.elastic_box
-            ok = True
-        if ok:
-            faces_list = element.getElementsByTagName('IndexedFaceSet')[0].attributes['coordIndex'].value
-            
-            faces_list = prepare_v_list(faces_list).strip(' ')
-            
-            faces_list = faces_list.split('-1')
-            
-            faces_list = [face_s.split(' ') for face_s in faces_list if face_s != ' ' and face_s != '']
-            o.planes.extend(Planes([Plane(face) for face in faces_list]))
-            v_c = element.getElementsByTagName('IndexedFaceSet')[0].getElementsByTagName('Coordinate')[0].attributes['point'].value
-            v_c = v_c.split(' ')
-            o.points.extend(Vertices([Point(v_c[i],v_c[i+1],v_c[i+2],int((i)/3),o.planes, 1) for i in range(0,len(v_c) - 1,3)]))
-            o.points.pop(0)
-            for atr in element.attributes.items():
-                t = transformation.factory(name = atr[0], property = atr[1:])
-                if t != None: 
-                    o.transforms.extend([t])
-            objects.extend([o])
+from generator.helper.transformation import Transformation
 
-def prepare_v_list(v_list):
-    '''
+import generator
+
+
+def read_model(file_name, objects):
+    try:
+        model_doc = minidom.parse(file_name)
+        '''
+        TODO: add check
+        '''
+        for element in model_doc.getElementsByTagName('Transform'):
+            o = generator.Generator.Obj()
+            ok = False
+            if element.attributes['DEF'].value == 'cube_world_TRANSFORM':
+                o.type = generator.Generator.Obj.boundary_box
+                ok = True
+            if element.attributes['DEF'].value == 'cube_liquid_TRANSFORM':
+                o.type = generator.Generator.Obj.liquid_box
+                ok = True
+            if element.attributes['DEF'].value == 'cube_elastic_TRANSFORM':
+                o.type = generator.Generator.Obj.elastic_box
+                ok = True
+            if ok:
+                faces_list = element.getElementsByTagName('IndexedFaceSet')[0].attributes['coordIndex'].value
+
+                faces_list = prepare_vertices_list(faces_list).strip(' ')
+
+                faces_list = faces_list.split('-1')
+
+                faces_list = [face_s.split(' ') for face_s in faces_list if face_s != ' ' and face_s != '']
+                o.planes.extend(Planes([Plane(face) for face in faces_list]))
+                v_c = element.getElementsByTagName('IndexedFaceSet')[0].getElementsByTagName('Coordinate')[0].attributes[
+                    'point'].value
+                v_c = v_c.split(' ')
+                o.points.extend(Vertices(
+                    [Point(v_c[i], v_c[i + 1], v_c[i + 2], int(i / 3), o.planes) for i in range(0, len(v_c) - 1, 3)]))
+                for atr in element.attributes.items():
+                    t = Transformation.factory(name=atr[0], property=atr[1:])
+                    if t != None:
+                        o.transforms.extend([t])
+                objects.extend([o])
+    except PlaneException as ex:
+        print ex
+
+
+def prepare_vertices_list(v_list):
+    """
     Vertices list can start not from 0 but and from 1
     we should correctly work with it
-    '''
+    """
     _v_list = v_list.split(' ')
     zero_v = int(_v_list[0])
     for v in _v_list:
@@ -103,4 +110,3 @@ def prepare_v_list(v_list):
     else:
         result_str = v_list
     return result_str
-        
