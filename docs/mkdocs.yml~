@@ -1,0 +1,8 @@
+site_name: Sibernetic Config Gen Developer Docs
+pages:
+- Home: index.md
+- Config_File_Sections: Config_File_Sections/connections.md
+- Config_File_Sections/connections.md
+- Config_File_Sections: Config_File_Sections/positions.md
+- Config_File_Sections: Config_File_Sections/velocities.md
+theme: readthedocs

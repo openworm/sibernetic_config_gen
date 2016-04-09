@@ -1,0 +1,13 @@
+These are docs for the Sibernetic Config Gen software
+
+from http://www.mkdocs.org/#getting-started
+
+To run these docs locally:
+
+install MKDocs:
+$ pip install mkdocs
+
+run the docs:
+$ mkdocs serve
+Running at: http://127.0.0.1:8000/
+
