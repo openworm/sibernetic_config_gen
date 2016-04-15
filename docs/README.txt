@@ -11,6 +11,7 @@ install MKDocs:
 $ pip install mkdocs
 
 run the docs:
-$ ./docs/mkdocs serve
+$ cd docs
+$ mkdocs serve
 Running at: http://127.0.0.1:8000/
 
