@@ -5,3 +5,4 @@ pages:
 - [Config_File_Sections/connections.md, Config File Sections, Connections]
 - [Config_File_Sections/positions.md, Config File Sections, Positions]
 - [Config_File_Sections/velocities.md, Config File Sections, Velocities]
+- [Minimal_Object_Reqs/minimal_object_reqs.md, Minimal Object Reqs, Minimal Object Reqs]
