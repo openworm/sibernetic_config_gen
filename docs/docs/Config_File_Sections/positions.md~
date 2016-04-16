@@ -1,0 +1,12 @@
+# Positions Section
+
+[position] - contains information about position of all particles
+<br>a b c d
+<br>
+<br>where:
+<br>a = x dimention
+<br>b = y dimention
+<br>c = z dimention
+<br>d = type of particle
+
+
