@@ -1,0 +1,19 @@
+repo: openworm/sibernetic_config_gen
+shortDescription: "Generates starting scene configuration for the Sibernetic simulation engine"
+coordinator: skhayrulin@openworm.org
+documentation: "https://openworm.github.io/sibernetic/"
+gitter: "http://gitter.im/openworm/sibernetic"
+keywords: 
+  - simulation
+  - physics
+  - particles
+  - worm body
+  - configuration
+languages: 
+  - python
+members: 
+  - palyanov.andrey@openworm.org
+outputs: 
+  - openworm/sibernetic
+parent: 
+  - openworm/sibernetic
